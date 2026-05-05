@@ -1,0 +1,248 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id         String   @id @default(cuid())
+  clerkOrgId String   @unique
+  name       String
+  plan       String   @default("free")
+  createdAt  DateTime @default(now())
+
+  members                OrganizationMember[]
+  workspaces             Workspace[]
+  contacts               Contact[]
+  deals                  Deal[]
+  activities             Activity[]
+  tasks                  Task[]
+  tags                   Tag[]
+  customFieldDefinitions CustomFieldDefinition[]
+  documents              Document[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clerkUserId    String
+  email          String
+  role           String       @default("owner")
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, clerkUserId])
+}
+
+model Workspace {
+  id                 String       @id @default(cuid())
+  organizationId     String
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name               String
+  slug               String
+  color              String       @default("#1E293B")
+  professionTemplate String
+  webhookToken       String       @unique
+  sortOrder          Int          @default(0)
+  createdAt          DateTime     @default(now())
+
+  stages                 Stage[]
+  contactWorkspaces      ContactWorkspace[]
+  deals                  Deal[]
+  activities             Activity[]
+  tasks                  Task[]
+  customFieldDefinitions CustomFieldDefinition[]
+  documents              Document[]
+
+  @@unique([organizationId, slug])
+}
+
+model Contact {
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  firstName       String
+  lastName        String?
+  email           String?
+  phone           String?
+  birthday        DateTime?
+  homeAnniversary DateTime?
+  source          String?
+  sourceDetail    String?
+  temperature     String       @default("warm")
+  notes           String?      @db.Text
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  contactWorkspaces ContactWorkspace[]
+  contactTags       ContactTag[]
+  deals             Deal[]
+  activities        Activity[]
+  tasks             Task[]
+  documents         Document[]
+
+  @@index([organizationId])
+}
+
+model ContactWorkspace {
+  id          String    @id @default(cuid())
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  roleLabel   String?
+  addedAt     DateTime  @default(now())
+
+  @@unique([contactId, workspaceId])
+}
+
+model Stage {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name            String
+  sortOrder       Int
+  isTerminal      Boolean   @default(false)
+  terminalOutcome String?
+
+  deals Deal[]
+}
+
+model Deal {
+  id                String       @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspaceId       String
+  workspace         Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId         String?
+  contact           Contact?     @relation(fields: [contactId], references: [id])
+  stageId           String
+  stage             Stage        @relation(fields: [stageId], references: [id])
+  title             String
+  value             Decimal?     @db.Decimal(12, 2)
+  expectedCloseDate DateTime?
+  status            String       @default("open")
+  notes             String?      @db.Text
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  activities Activity[]
+  tasks      Task[]
+  documents  Document[]
+
+  @@index([organizationId, workspaceId])
+}
+
+model Activity {
+  id                   String       @id @default(cuid())
+  organizationId       String
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspaceId          String?
+  workspace            Workspace?   @relation(fields: [workspaceId], references: [id])
+  contactId            String?
+  contact              Contact?     @relation(fields: [contactId], references: [id])
+  dealId               String?
+  deal                 Deal?        @relation(fields: [dealId], references: [id])
+  type                 String
+  body                 String       @db.Text
+  occurredAt           DateTime     @default(now())
+  createdByClerkUserId String?
+  createdAt            DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([dealId])
+}
+
+model Task {
+  id                    String       @id @default(cuid())
+  organizationId        String
+  organization          Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspaceId           String
+  workspace             Workspace    @relation(fields: [workspaceId], references: [id])
+  contactId             String?
+  contact               Contact?     @relation(fields: [contactId], references: [id])
+  dealId                String?
+  deal                  Deal?        @relation(fields: [dealId], references: [id])
+  title                 String
+  dueAt                 DateTime?
+  completedAt           DateTime?
+  assignedToClerkUserId String?
+  createdAt             DateTime     @default(now())
+
+  @@index([organizationId, dueAt])
+}
+
+model Tag {
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name            String
+  color           String       @default("#64748B")
+  professionScope String?
+
+  contactTags ContactTag[]
+
+  @@unique([organizationId, name])
+}
+
+model ContactTag {
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, tagId])
+}
+
+model CustomFieldDefinition {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspaceId    String?
+  workspace      Workspace?   @relation(fields: [workspaceId], references: [id])
+  entityType     String
+  fieldKey       String
+  fieldLabel     String
+  fieldType      String
+  options        Json?
+  isRequired     Boolean      @default(false)
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  values CustomFieldValue[]
+
+  @@unique([organizationId, workspaceId, entityType, fieldKey])
+}
+
+model CustomFieldValue {
+  id           String                @id @default(cuid())
+  definitionId String
+  definition   CustomFieldDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  entityType   String
+  entityId     String
+  value        Json
+
+  @@unique([definitionId, entityId])
+  @@index([entityType, entityId])
+}
+
+model Document {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspaceId    String
+  workspace      Workspace    @relation(fields: [workspaceId], references: [id])
+  contactId      String?
+  contact        Contact?     @relation(fields: [contactId], references: [id])
+  dealId         String?
+  deal           Deal?        @relation(fields: [dealId], references: [id])
+  r2Key          String
+  fileName       String
+  fileSize       Int
+  mimeType       String
+  uploadedAt     DateTime     @default(now())
+}

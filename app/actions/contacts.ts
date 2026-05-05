@@ -1,0 +1,166 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { db } from "@/lib/db";
+import { requireOrg } from "@/lib/auth";
+
+const contactSchema = z.object({
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().max(100).optional().nullable(),
+  email: z.string().email().optional().nullable().or(z.literal("")),
+  phone: z.string().max(30).optional().nullable(),
+  source: z.string().max(100).optional().nullable(),
+  sourceDetail: z.string().max(255).optional().nullable(),
+  temperature: z.enum(["hot", "warm", "cold"]).default("warm"),
+  notes: z.string().optional().nullable(),
+  birthday: z.string().optional().nullable(),
+  homeAnniversary: z.string().optional().nullable(),
+});
+
+function normalizeContact(data: z.infer<typeof contactSchema>) {
+  return {
+    ...data,
+    email: data.email || null,
+    phone: data.phone || null,
+    lastName: data.lastName || null,
+    source: data.source || null,
+    sourceDetail: data.sourceDetail || null,
+    notes: data.notes || null,
+    birthday: data.birthday ? new Date(data.birthday) : null,
+    homeAnniversary: data.homeAnniversary ? new Date(data.homeAnniversary) : null,
+  };
+}
+
+function extractContactData(formData: FormData) {
+  return {
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName") || null,
+    email: formData.get("email") || null,
+    phone: formData.get("phone") || null,
+    source: formData.get("source") || null,
+    sourceDetail: formData.get("sourceDetail") || null,
+    temperature: formData.get("temperature") || "warm",
+    notes: formData.get("notes") || null,
+    birthday: formData.get("birthday") || null,
+    homeAnniversary: formData.get("homeAnniversary") || null,
+  };
+}
+
+export async function createContact(formData: FormData) {
+  const { organizationId } = await requireOrg();
+  const raw = extractContactData(formData);
+  const parsed = contactSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  const contact = await db.contact.create({
+    data: {
+      organizationId,
+      ...normalizeContact(parsed.data),
+    },
+  });
+
+  revalidatePath("/contacts");
+  redirect(`/contacts/${contact.id}`);
+}
+
+export async function updateContact(id: string, formData: FormData) {
+  const { organizationId } = await requireOrg();
+
+  const existing = await db.contact.findFirst({ where: { id, organizationId } });
+  if (!existing) return { error: "Not found" };
+
+  const raw = extractContactData(formData);
+  const parsed = contactSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  await db.contact.update({
+    where: { id },
+    data: normalizeContact(parsed.data),
+  });
+
+  revalidatePath("/contacts");
+  revalidatePath(`/contacts/${id}`);
+  return { success: true };
+}
+
+export async function deleteContact(id: string) {
+  const { organizationId } = await requireOrg();
+
+  const existing = await db.contact.findFirst({ where: { id, organizationId } });
+  if (!existing) return { error: "Not found" };
+
+  await db.contact.delete({ where: { id } });
+
+  revalidatePath("/contacts");
+  redirect("/contacts");
+}
+
+export async function addContactToWorkspace(contactId: string, workspaceId: string, roleLabel?: string) {
+  const { organizationId } = await requireOrg();
+
+  const [contact, workspace] = await Promise.all([
+    db.contact.findFirst({ where: { id: contactId, organizationId } }),
+    db.workspace.findFirst({ where: { id: workspaceId, organizationId } }),
+  ]);
+
+  if (!contact || !workspace) return { error: "Not found" };
+
+  await db.contactWorkspace.upsert({
+    where: { contactId_workspaceId: { contactId, workspaceId } },
+    create: { contactId, workspaceId, roleLabel: roleLabel ?? null },
+    update: { roleLabel: roleLabel ?? null },
+  });
+
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true };
+}
+
+export async function removeContactFromWorkspace(contactId: string, workspaceId: string) {
+  const { organizationId } = await requireOrg();
+
+  const contact = await db.contact.findFirst({ where: { id: contactId, organizationId } });
+  if (!contact) return { error: "Not found" };
+
+  await db.contactWorkspace.deleteMany({ where: { contactId, workspaceId } });
+
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true };
+}
+
+export async function addTagToContact(contactId: string, tagId: string) {
+  const { organizationId } = await requireOrg();
+
+  const [contact, tag] = await Promise.all([
+    db.contact.findFirst({ where: { id: contactId, organizationId } }),
+    db.tag.findFirst({ where: { id: tagId, organizationId } }),
+  ]);
+
+  if (!contact || !tag) return { error: "Not found" };
+
+  await db.contactTag.upsert({
+    where: { contactId_tagId: { contactId, tagId } },
+    create: { contactId, tagId },
+    update: {},
+  });
+
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true };
+}
+
+export async function removeTagFromContact(contactId: string, tagId: string) {
+  const { organizationId } = await requireOrg();
+
+  const contact = await db.contact.findFirst({ where: { id: contactId, organizationId } });
+  if (!contact) return { error: "Not found" };
+
+  await db.contactTag.deleteMany({ where: { contactId, tagId } });
+
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true };
+}
