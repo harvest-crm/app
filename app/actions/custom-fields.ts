@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { Prisma } from "@/app/generated/prisma/client";
+import { labelToKey } from "@/lib/format";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -43,14 +44,6 @@ function serializeDef(d: {
     isRequired: d.isRequired,
     sortOrder: d.sortOrder,
   };
-}
-
-export function labelToKey(label: string): string {
-  return label
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/, "")
-    .slice(0, 50);
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────

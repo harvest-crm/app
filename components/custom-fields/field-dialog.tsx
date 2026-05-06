@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import { createDefinition, updateDefinition, labelToKey } from "@/app/actions/custom-fields";
+import { createDefinition, updateDefinition } from "@/app/actions/custom-fields";
+import { labelToKey } from "@/lib/format";
 import type { SerializedFieldDef } from "@/app/actions/custom-fields";
 
 const FIELD_TYPES = [
