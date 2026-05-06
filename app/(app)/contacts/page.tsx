@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
+import { ExportCsvButton } from "@/components/export-csv-button";
 
 const TEMPERATURE_COLORS = {
   hot: "bg-red-100 text-red-700",
@@ -72,12 +73,15 @@ export default async function ContactsPage({
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">Contacts</h1>
-        <Link href="/contacts/new">
-          <Button size="sm">
-            <Plus className="mr-1.5 h-4 w-4" />
-            New Contact
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <ExportCsvButton filters={{ q: params.q, workspace: params.workspace }} />
+          <Link href="/contacts/new">
+            <Button size="sm">
+              <Plus className="mr-1.5 h-4 w-4" />
+              New Contact
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="mb-4 flex gap-3">

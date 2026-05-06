@@ -180,3 +180,72 @@ export async function removeTagFromContact(contactId: string, tagId: string) {
   revalidatePath(`/contacts/${contactId}`);
   return { success: true };
 }
+
+// ── CSV Export ──────────────────────────────────────────────────────────────
+
+function csvCell(v: string | null | undefined): string {
+  const s = String(v ?? "");
+  return /[,"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function fmtDateOnly(d: Date | null): string {
+  return d ? d.toISOString().slice(0, 10) : "";
+}
+
+function fmtPhone(raw: string | null): string {
+  if (!raw) return "";
+  const d = raw.replace(/\D/g, "");
+  return d.length === 10
+    ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`
+    : raw;
+}
+
+const CSV_HEADERS = [
+  "First Name", "Last Name", "Email", "Phone",
+  "Source", "Source Detail", "Temperature",
+  "Birthday", "Home Anniversary", "Notes",
+  "Tags", "Workspaces", "Created At",
+];
+
+export async function exportContactsToCsv(filters: {
+  q?: string;
+  workspace?: string;
+}): Promise<string> {
+  const { organizationId } = await requireOrg();
+
+  const contacts = await db.contact.findMany({
+    where: {
+      organizationId,
+      ...(filters.q
+        ? {
+            OR: [
+              { firstName: { contains: filters.q, mode: "insensitive" } },
+              { lastName: { contains: filters.q, mode: "insensitive" } },
+              { email: { contains: filters.q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+      ...(filters.workspace
+        ? { contactWorkspaces: { some: { workspace: { slug: filters.workspace } } } }
+        : {}),
+    },
+    include: {
+      contactTags: { include: { tag: { select: { name: true } } } },
+      contactWorkspaces: { include: { workspace: { select: { name: true } } } },
+    },
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+  });
+
+  const rows = contacts.map((c) => {
+    const tags = c.contactTags.map((ct) => ct.tag.name).join(", ");
+    const workspaces = c.contactWorkspaces.map((cw) => cw.workspace.name).join(", ");
+    return [
+      c.firstName, c.lastName, c.email, fmtPhone(c.phone),
+      c.source, c.sourceDetail, c.temperature,
+      fmtDateOnly(c.birthday), fmtDateOnly(c.homeAnniversary),
+      c.notes, tags, workspaces, c.createdAt.toISOString(),
+    ].map(csvCell).join(",");
+  });
+
+  return [CSV_HEADERS.join(","), ...rows].join("\r\n") + "\r\n";
+}
