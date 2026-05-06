@@ -13,11 +13,14 @@ import { cn } from "@/lib/utils";
 import { createDeal, updateDeal, deleteDeal } from "@/app/actions/deals";
 import { listActivitiesForDeal } from "@/app/actions/activities";
 import { listTasksForDeal } from "@/app/actions/tasks";
+import { listDefinitionsForWorkspace, getValuesForEntity } from "@/app/actions/custom-fields";
 import { ActivityFeed } from "@/components/activity-feed";
 import { TasksFeed } from "@/components/tasks-feed";
+import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
 import type { SerializedDeal, SerializedStage, ContactOption } from "./types";
 import type { SerializedActivity } from "@/app/actions/activities";
 import type { SerializedTask } from "@/app/actions/tasks";
+import type { SerializedFieldDef } from "@/app/actions/custom-fields";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -57,6 +60,25 @@ export function DealDialog({
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  // Custom fields section
+  const [cfOpen,    setCfOpen]    = useState(false);
+  const [cfDefs,    setCfDefs]    = useState<SerializedFieldDef[]>([]);
+  const [cfValues,  setCfValues]  = useState<Record<string, unknown>>({});
+  const [cfLoaded,  setCfLoaded]  = useState(false);
+
+  useEffect(() => {
+    if (cfOpen && !cfLoaded && deal?.workspaceId) {
+      Promise.all([
+        listDefinitionsForWorkspace(deal.workspaceId, "deal"),
+        getValuesForEntity("deal", deal.id),
+      ]).then(([defs, vals]) => {
+        setCfDefs(defs);
+        setCfValues(vals);
+        setCfLoaded(true);
+      });
+    }
+  }, [cfOpen, cfLoaded, deal]);
 
   // Tasks section
   const [tasksOpen, setTasksOpen] = useState(false);
@@ -293,6 +315,49 @@ export function DealDialog({
               </div>
             </div>
           </form>
+
+          {/* Custom Fields section — edit mode only */}
+          {mode === "edit" && deal && (
+            <div className="border-t">
+              <button
+                type="button"
+                onClick={() => setCfOpen((o) => !o)}
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 hover:text-slate-600"
+              >
+                <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", cfOpen && "rotate-90")} />
+                Custom Fields
+                {cfLoaded && cfDefs.length > 0 && (
+                  <span className="ml-auto font-normal normal-case text-slate-400">
+                    {cfDefs.length}
+                  </span>
+                )}
+              </button>
+              {cfOpen && (
+                <div className="px-5 pb-4">
+                  {cfLoaded ? (
+                    cfDefs.length > 0 ? (
+                      <FieldValuesEditor
+                        key={deal.id + "-cf"}
+                        defs={cfDefs}
+                        initialValues={cfValues}
+                        entityType="deal"
+                        entityId={deal.id}
+                      />
+                    ) : (
+                      <p className="text-xs text-slate-400">
+                        No custom fields defined for this workspace.{" "}
+                        <a href={`/workspaces/${deal.workspaceId}/fields`} className="text-blue-600 hover:underline">
+                          Add fields
+                        </a>
+                      </p>
+                    )
+                  ) : (
+                    <p className="py-3 text-center text-xs text-slate-400">Loading…</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tasks section — edit mode only */}
           {mode === "edit" && deal && (

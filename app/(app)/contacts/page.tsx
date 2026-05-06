@@ -70,6 +70,39 @@ export default async function ContactsPage({
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   });
 
+  // Price range special render — only fetch if definitions exist in this org
+  const priceRangeDefs = await db.customFieldDefinition.findMany({
+    where: { organizationId: org.id, fieldKey: { in: ["price_range_min", "price_range_max"] }, entityType: "contact" },
+    select: { id: true, fieldKey: true },
+  });
+  const priceDefMap = new Map(priceRangeDefs.map((d) => [d.fieldKey, d.id]));
+  const priceValues =
+    priceRangeDefs.length > 0
+      ? await db.customFieldValue.findMany({
+          where: { definitionId: { in: priceRangeDefs.map((d) => d.id) }, entityId: { in: contacts.map((c) => c.id) } },
+          select: { definitionId: true, entityId: true, value: true },
+        })
+      : [];
+
+  // Build lookup: contactId -> { min, max }
+  const priceByContact = new Map<string, { min?: number; max?: number }>();
+  for (const v of priceValues) {
+    const key = v.definitionId === priceDefMap.get("price_range_min") ? "min" : "max";
+    const entry = priceByContact.get(v.entityId) ?? {};
+    entry[key] = typeof v.value === "number" ? v.value : Number(v.value);
+    priceByContact.set(v.entityId, entry);
+  }
+
+  function fmtPriceRange(contactId: string): string | null {
+    const p = priceByContact.get(contactId);
+    if (!p || (!p.min && !p.max)) return null;
+    const fmt = (n: number) =>
+      n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${Math.round(n / 1_000)}k` : `$${n}`;
+    if (p.min && p.max) return `${fmt(p.min)} – ${fmt(p.max)}`;
+    if (p.min) return `${fmt(p.min)}+`;
+    return `up to ${fmt(p.max!)}`;
+  }
+
   return (
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
@@ -149,6 +182,9 @@ export default async function ContactsPage({
                     >
                       {c.firstName} {c.lastName}
                     </Link>
+                    {fmtPriceRange(c.id) && (
+                      <div className="mt-0.5 text-xs text-slate-400">{fmtPriceRange(c.id)}</div>
+                    )}
                     {c.contactWorkspaces.length > 0 && (
                       <div className="mt-0.5 flex gap-1">
                         {c.contactWorkspaces.map((cw) => (

@@ -40,10 +40,13 @@ export default async function WorkspacePage({
 
       <div className="flex gap-3">
         <Link href={`/workspaces/${slug}/deals`}>
-          <Button variant="outline">Deals (Week 2)</Button>
+          <Button variant="outline">Deals</Button>
         </Link>
         <Link href={`/workspaces/${slug}/tasks`}>
-          <Button variant="outline">Tasks (Week 3)</Button>
+          <Button variant="outline">Tasks</Button>
+        </Link>
+        <Link href={`/workspaces/${slug}/fields`}>
+          <Button variant="outline">Custom Fields</Button>
         </Link>
       </div>
 
