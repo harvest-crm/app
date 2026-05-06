@@ -223,9 +223,9 @@ export function TodayDashboard({
   }
 
   const pipelineSummary =
-    pipeline.openDealsCount > 0
-      ? `${fmtCurrency(pipeline.totalValue)} open across ${pipeline.openDealsCount} deal${pipeline.openDealsCount !== 1 ? "s" : ""}`
-      : "";
+    pipeline.openDealsCount === 0
+      ? "No open deals"
+      : `${fmtCurrency(pipeline.totalValue)} across ${pipeline.openDealsCount} open deal${pipeline.openDealsCount !== 1 ? "s" : ""}`;
 
   const isAllClear =
     hasContacts &&

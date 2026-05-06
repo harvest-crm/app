@@ -45,7 +45,8 @@ export default async function TodayPage() {
   });
   if (!org) return null;
 
-  const firstName = user?.firstName ?? "there";
+  const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
+  const firstName = user?.firstName || email.split("@")[0] || "there";
 
   const now = new Date();
   const startOfToday = new Date(
