@@ -23,7 +23,8 @@ function normalizeContact(data: z.infer<typeof contactSchema>) {
   return {
     ...data,
     email: data.email || null,
-    phone: data.phone || null,
+    // Strip non-digits so DB always holds clean digits (e.g. "5551234567")
+    phone: data.phone ? data.phone.replace(/\D/g, "") || null : null,
     lastName: data.lastName || null,
     source: data.source || null,
     sourceDetail: data.sourceDetail || null,
@@ -63,8 +64,23 @@ export async function createContact(formData: FormData) {
     },
   });
 
+  const workspaceIds = formData.getAll("workspaceIds") as string[];
+  if (workspaceIds.length > 0) {
+    const validWorkspaces = await db.workspace.findMany({
+      where: { id: { in: workspaceIds }, organizationId },
+      select: { id: true },
+    });
+    await db.contactWorkspace.createMany({
+      data: validWorkspaces.map(({ id: workspaceId }) => ({
+        contactId: contact.id,
+        workspaceId,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
   revalidatePath("/contacts");
-  redirect(`/contacts/${contact.id}`);
+  return { id: contact.id };
 }
 
 export async function updateContact(id: string, formData: FormData) {
