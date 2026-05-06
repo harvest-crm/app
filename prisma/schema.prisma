@@ -125,6 +125,7 @@ model Deal {
   value             Decimal?     @db.Decimal(12, 2)
   expectedCloseDate DateTime?
   status            String       @default("open")
+  movedToStageAt    DateTime     @default(now())
   notes             String?      @db.Text
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
