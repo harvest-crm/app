@@ -81,6 +81,18 @@ export async function importContacts(formData: FormData): Promise<ImportResult |
     return { error: "Invalid mapping data" };
   }
 
+  // Guard: mappings must have at least one non-skip field
+  const usefulMappings = Object.values(mappings).filter((v) => v !== "skip");
+  if (usefulMappings.length === 0) {
+    return { error: "No column mappings provided — check that column mapping step was completed" };
+  }
+
+  // Helper: look up a CSV header by target field key, then read the row value
+  function getField(row: Record<string, string>, fieldKey: string): string {
+    const header = Object.keys(mappings).find((k) => mappings[k] === fieldKey);
+    return header ? (row[header] ?? "").trim() : "";
+  }
+
   // Server-side re-parse for safety
   const parsed = Papa.parse<Record<string, string>>(csvString, {
     header: true,
@@ -106,15 +118,16 @@ export async function importContacts(formData: FormData): Promise<ImportResult |
     const row     = rows[i];
     const rowNum  = i + 2; // 1-indexed + header row
 
-    // Apply mappings
-    const firstName    = (mappings["firstName"]    ? row[Object.keys(mappings).find(k => mappings[k] === "firstName") ?? ""] : undefined)?.trim() ?? "";
-    const lastName     = (mappings["lastName"]     ? row[Object.keys(mappings).find(k => mappings[k] === "lastName")  ?? ""] : undefined)?.trim() ?? "";
-    const email        = (mappings["email"]        ? row[Object.keys(mappings).find(k => mappings[k] === "email")     ?? ""] : undefined)?.trim().toLowerCase() ?? "";
-    const phone        = (mappings["phone"]        ? row[Object.keys(mappings).find(k => mappings[k] === "phone")     ?? ""] : undefined)?.trim() ?? "";
-    const source       = (mappings["source"]       ? row[Object.keys(mappings).find(k => mappings[k] === "source")    ?? ""] : undefined)?.trim() ?? "";
-    const notes        = (mappings["notes"]        ? row[Object.keys(mappings).find(k => mappings[k] === "notes")     ?? ""] : undefined)?.trim() ?? "";
-    const birthdayRaw  = (mappings["birthday"]     ? row[Object.keys(mappings).find(k => mappings[k] === "birthday")  ?? ""] : undefined) ?? "";
-    const anniversaryRaw = (mappings["homeAnniversary"] ? row[Object.keys(mappings).find(k => mappings[k] === "homeAnniversary") ?? ""] : undefined) ?? "";
+    // Apply mappings — getField(row, fieldKey) finds the CSV header whose
+    // value in the mappings map equals fieldKey, then reads that column
+    const firstName      = getField(row, "firstName");
+    const lastName       = getField(row, "lastName");
+    const email          = getField(row, "email").toLowerCase();
+    const phone          = getField(row, "phone");
+    const source         = getField(row, "source");
+    const notes          = getField(row, "notes");
+    const birthdayRaw    = getField(row, "birthday");
+    const anniversaryRaw = getField(row, "homeAnniversary");
 
     // Validate
     if (!firstName && !email) {
