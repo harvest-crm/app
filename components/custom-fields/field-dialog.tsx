@@ -63,7 +63,7 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
   }
 
   const inputCls =
-    "w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+    "w-full rounded-md border border-[#E8DFC8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1F8A8A]";
 
   return (
     <div
@@ -72,11 +72,11 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
     >
       <div className="relative w-full max-w-md rounded-xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b px-5 py-4">
-          <h2 className="text-base font-semibold text-stone-800">
+          <h2 className="text-base font-semibold text-[#0F2540]">
             {mode === "create" ? "Add custom field" : "Edit field"}
           </h2>
           <button type="button" onClick={onClose}
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100">
+            className="rounded-md p-1 text-[#3D5775] hover:bg-[#E2F0EE]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -84,7 +84,7 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
         <form onSubmit={handleSubmit} className="space-y-4 px-5 py-4">
           {/* Label */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
               Label
             </label>
             <input
@@ -98,16 +98,16 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
               className={inputCls}
             />
             {label && (
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-[#3D5775]">
                 Stored as:{" "}
-                <code className="rounded bg-stone-100 px-1 py-0.5">{previewKey}</code>
+                <code className="rounded bg-[#E2F0EE] px-1 py-0.5">{previewKey}</code>
               </p>
             )}
           </div>
 
           {/* Field type */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
               Type
             </label>
             <select
@@ -125,9 +125,9 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
           {/* Options (select / multiselect) */}
           {showOptions && (
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
                 Options{" "}
-                <span className="font-normal normal-case text-stone-400">(comma-separated)</span>
+                <span className="font-normal normal-case text-[#3D5775]">(comma-separated)</span>
               </label>
               <textarea
                 value={options}
@@ -147,9 +147,9 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
               checked={isRequired}
               onChange={(e) => setIsRequired(e.target.checked)}
               disabled={pending}
-              className="rounded border-stone-300"
+              className="rounded border-[#E8DFC8]"
             />
-            <span className="text-sm text-stone-700">Required</span>
+            <span className="text-sm text-[#3D5775]">Required</span>
           </label>
 
           {serverErr && (
@@ -158,11 +158,11 @@ export function FieldDialog({ mode, def, workspaceId, entityType, onSaved, onClo
 
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" onClick={onClose} disabled={pending}
-              className="rounded-md border border-stone-200 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50 disabled:opacity-50">
+              className="rounded-md border border-[#E8DFC8] px-3 py-1.5 text-sm text-[#3D5775] hover:bg-[#E2F0EE] disabled:opacity-50">
               Cancel
             </button>
             <button type="submit" disabled={pending || !label.trim()}
-              className="rounded-md bg-stone-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-stone-900 disabled:opacity-40">
+              className="rounded-md bg-[#1F8A8A] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#1A7575] disabled:opacity-40">
               {pending ? "Saving…" : mode === "create" ? "Add field" : "Save changes"}
             </button>
           </div>

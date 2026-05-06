@@ -77,10 +77,10 @@ function DocRow({
   }
 
   return (
-    <div className="group flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-stone-50">
+    <div className="group flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#E2F0EE]">
       {/* Icon */}
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-stone-100">
-        <Icon className="h-4 w-4 text-stone-500" />
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#E2F0EE]">
+        <Icon className="h-4 w-4 text-[#3D5775]" />
       </div>
 
       {/* File info */}
@@ -89,12 +89,12 @@ function DocRow({
           onClick={handleDownload}
           disabled={downloading}
           className={cn(
-            "block max-w-full truncate text-left text-sm font-medium text-blue-600 hover:underline disabled:opacity-50",
+            "block max-w-full truncate text-left text-sm font-medium text-[#1F8A8A] hover:underline disabled:opacity-50",
           )}
         >
           {doc.fileName}
         </button>
-        <p className="text-xs text-stone-400">
+        <p className="text-xs text-[#3D5775]">
           {fmtBytes(doc.fileSize)} · {fmtRelative(doc.uploadedAt)}
         </p>
       </div>
@@ -102,7 +102,7 @@ function DocRow({
       {/* Actions */}
       {confirmDelete ? (
         <div className="flex shrink-0 items-center gap-2">
-          <span className="text-xs text-stone-500">Delete?</span>
+          <span className="text-xs text-[#3D5775]">Delete?</span>
           <button
             onClick={handleDelete}
             className="text-xs font-semibold text-red-600 hover:text-red-700"
@@ -111,7 +111,7 @@ function DocRow({
           </button>
           <button
             onClick={() => setConfirmDelete(false)}
-            className="text-xs text-stone-400 hover:text-stone-600"
+            className="text-xs text-[#3D5775] hover:text-[#3D5775]"
           >
             No
           </button>
@@ -120,7 +120,7 @@ function DocRow({
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="shrink-0 rounded p-1 text-stone-300 opacity-0 transition-opacity hover:bg-red-100 hover:text-red-500 group-hover:opacity-100"
+          className="shrink-0 rounded p-1 text-[#3D5775] opacity-0 transition-opacity hover:bg-red-100 hover:text-red-500 group-hover:opacity-100"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -139,7 +139,7 @@ export function DocumentList({
   onDeleted: (id: string) => void;
 }) {
   if (documents.length === 0) {
-    return <p className="py-4 text-center text-xs text-stone-400">No documents yet.</p>;
+    return <p className="py-4 text-center text-xs text-[#3D5775]">No documents yet.</p>;
   }
 
   return (

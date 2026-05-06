@@ -59,7 +59,7 @@ function TagRow({ tag, onSaved }: { tag: TagWithCount; onSaved?: () => void }) {
 
   if (editing) {
     return (
-      <div className="flex items-center gap-3 rounded-md border bg-stone-50 px-3 py-2">
+      <div className="flex items-center gap-3 rounded-md border bg-[#F5EFE0] px-3 py-2">
         <span
           className="h-3 w-3 shrink-0 rounded-full"
           style={{ backgroundColor: color }}
@@ -88,7 +88,7 @@ function TagRow({ tag, onSaved }: { tag: TagWithCount; onSaved?: () => void }) {
         style={{ backgroundColor: tag.color }}
       />
       <span className="flex-1 text-sm font-medium">{tag.name}</span>
-      <span className="text-xs text-stone-400">{tag._count.contactTags} contact{tag._count.contactTags !== 1 ? "s" : ""}</span>
+      <span className="text-xs text-[#3D5775]">{tag._count.contactTags} contact{tag._count.contactTags !== 1 ? "s" : ""}</span>
       <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
         <Pencil className="h-3.5 w-3.5" />
       </Button>
@@ -128,7 +128,7 @@ function NewTagRow({ onCreated }: { onCreated?: () => void }) {
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-md border-2 border-dashed border-stone-300 bg-stone-50 px-3 py-2">
+    <div className="flex items-center gap-3 rounded-md border-2 border-dashed border-[#E8DFC8] bg-[#F5EFE0] px-3 py-2">
       <span
         className="h-3 w-3 shrink-0 rounded-full"
         style={{ backgroundColor: color }}

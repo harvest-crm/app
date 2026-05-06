@@ -11,7 +11,7 @@ import { formatPhone } from "@/lib/format";
 const TEMPERATURE_COLORS = {
   hot: "bg-red-100 text-red-700",
   warm: "bg-amber-100 text-amber-700",
-  cold: "bg-blue-100 text-blue-700",
+  cold: "bg-[#E2F0EE] text-[#1F8A8A]",
 } as const;
 
 export default async function ContactsPage({
@@ -32,7 +32,7 @@ export default async function ContactsPage({
   if (!org) {
     return (
       <div className="p-8">
-        <p className="text-stone-500">Your organization is not set up yet. Sign out and sign in again.</p>
+        <p className="text-[#3D5775]">Your organization is not set up yet. Sign out and sign in again.</p>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export default async function ContactsPage({
   return (
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-stone-900">Contacts</h1>
+        <h1 className="text-2xl font-semibold text-[#0F2540]">Contacts</h1>
         <div className="flex items-center gap-2">
           <ExportCsvButton filters={{ q: params.q, workspace: params.workspace }} />
           <Link href="/contacts/import">
@@ -161,7 +161,7 @@ export default async function ContactsPage({
 
       {contacts.length === 0 ? (
         <div className="mt-12 text-center">
-          <p className="text-stone-500">No contacts found.</p>
+          <p className="text-[#3D5775]">No contacts found.</p>
           <Link href="/contacts/new" className="mt-2 inline-block">
             <Button variant="outline" size="sm">Add your first contact</Button>
           </Link>
@@ -169,45 +169,45 @@ export default async function ContactsPage({
       ) : (
         <div className="overflow-hidden rounded-lg border bg-white">
           <table className="w-full text-sm">
-            <thead className="border-b bg-stone-50">
+            <thead className="border-b bg-[#F5EFE0]">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-stone-600">Name</th>
-                <th className="px-4 py-3 text-left font-medium text-stone-600">Email</th>
-                <th className="px-4 py-3 text-left font-medium text-stone-600">Phone</th>
-                <th className="px-4 py-3 text-left font-medium text-stone-600">Temperature</th>
-                <th className="px-4 py-3 text-left font-medium text-stone-600">Tags</th>
+                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Name</th>
+                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Email</th>
+                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Phone</th>
+                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Temperature</th>
+                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Tags</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {contacts.map((c) => (
-                <tr key={c.id} className="hover:bg-stone-50">
+                <tr key={c.id} className="hover:bg-[#E2F0EE]">
                   <td className="px-4 py-3">
                     <Link
                       href={`/contacts/${c.id}`}
-                      className="font-medium text-stone-900 hover:text-blue-600"
+                      className="font-medium text-[#0F2540] hover:text-[#1F8A8A]"
                     >
                       {c.firstName} {c.lastName}
                     </Link>
                     {fmtPriceRange(c.id) && (
-                      <div className="mt-0.5 text-xs text-stone-400">{fmtPriceRange(c.id)}</div>
+                      <div className="mt-0.5 text-xs text-[#3D5775]">{fmtPriceRange(c.id)}</div>
                     )}
                     {c.contactWorkspaces.length > 0 && (
                       <div className="mt-0.5 flex gap-1">
                         {c.contactWorkspaces.map((cw) => (
-                          <span key={cw.workspace.slug} className="text-xs text-stone-400">
+                          <span key={cw.workspace.slug} className="text-xs text-[#3D5775]">
                             {cw.workspace.name}
                           </span>
                         ))}
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-stone-600">{c.email ?? ""}</td>
-                  <td className="px-4 py-3 text-stone-600">{formatPhone(c.phone)}</td>
+                  <td className="px-4 py-3 text-[#3D5775]">{c.email ?? ""}</td>
+                  <td className="px-4 py-3 text-[#3D5775]">{formatPhone(c.phone)}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
                         TEMPERATURE_COLORS[c.temperature as keyof typeof TEMPERATURE_COLORS] ??
-                        "bg-stone-100 text-stone-600"
+                        "bg-[#E2F0EE] text-[#3D5775]"
                       }`}
                     >
                       {c.temperature}

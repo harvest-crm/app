@@ -141,9 +141,9 @@ export function TaskDialog({
   }
 
   const inputClass =
-    "w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50";
+    "w-full rounded-md border border-[#E8DFC8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1F8A8A] disabled:opacity-50";
   const selectClass =
-    "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50";
+    "w-full rounded-md border border-[#E8DFC8] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1F8A8A] disabled:opacity-50";
 
   return (
     <div
@@ -153,11 +153,11 @@ export function TaskDialog({
       <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b px-5 py-4">
-          <h2 className="text-base font-semibold text-stone-800">
+          <h2 className="text-base font-semibold text-[#0F2540]">
             {mode === "create" ? "New Task" : "Edit Task"}
           </h2>
           <button type="button" onClick={onClose}
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+            className="rounded-md p-1 text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -166,7 +166,7 @@ export function TaskDialog({
         <form onSubmit={handleSubmit} className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
           {/* Title */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
               Title
             </label>
             <input
@@ -182,9 +182,9 @@ export function TaskDialog({
 
           {/* Description */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
               Description{" "}
-              <span className="font-normal normal-case text-stone-400">(optional)</span>
+              <span className="font-normal normal-case text-[#3D5775]">(optional)</span>
             </label>
             <textarea
               value={description}
@@ -199,7 +199,7 @@ export function TaskDialog({
           {/* Priority + Task Type */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
                 Priority
               </label>
               <div className="flex gap-1">
@@ -215,9 +215,9 @@ export function TaskDialog({
                         ? p === "high"
                           ? "bg-red-100 text-red-700"
                           : p === "medium"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-stone-100 text-stone-600"
-                        : "bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-stone-600",
+                            ? "bg-[#E2F0EE] text-[#1F8A8A]"
+                            : "bg-[#E2F0EE] text-[#3D5775]"
+                        : "bg-[#F5EFE0] text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]",
                     )}
                   >
                     {p}
@@ -227,7 +227,7 @@ export function TaskDialog({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
                 Task Type
               </label>
               <select
@@ -247,7 +247,7 @@ export function TaskDialog({
           {/* Due date + time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
                 Due Date
               </label>
               <input
@@ -259,9 +259,9 @@ export function TaskDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
                 Due Time{" "}
-                <span className="font-normal normal-case text-stone-400">(optional)</span>
+                <span className="font-normal normal-case text-[#3D5775]">(optional)</span>
               </label>
               <input
                 type="time"
@@ -275,7 +275,7 @@ export function TaskDialog({
 
           {/* Reminder */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
               Reminder
             </label>
             <select
@@ -311,13 +311,13 @@ export function TaskDialog({
               <div>
                 {confirmDelete ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-stone-500">Delete this task?</span>
+                    <span className="text-xs text-[#3D5775]">Delete this task?</span>
                     <button type="button" onClick={handleDelete} disabled={pending}
                       className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50">
                       Yes
                     </button>
                     <button type="button" onClick={() => setConfirmDelete(false)}
-                      className="text-xs text-stone-400 hover:text-stone-600">
+                      className="text-xs text-[#3D5775] hover:text-[#3D5775]">
                       No
                     </button>
                   </div>
@@ -334,11 +334,11 @@ export function TaskDialog({
 
             <div className="flex gap-2">
               <button type="button" onClick={onClose} disabled={pending}
-                className="rounded-md border border-stone-200 px-3 py-1.5 text-sm font-medium text-stone-600 hover:bg-stone-50 disabled:opacity-50">
+                className="rounded-md border border-[#E8DFC8] px-3 py-1.5 text-sm font-medium text-[#3D5775] hover:bg-[#E2F0EE] disabled:opacity-50">
                 Cancel
               </button>
               <button type="submit" disabled={pending || !title.trim()}
-                className="rounded-md bg-stone-800 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-stone-900 disabled:opacity-40">
+                className="rounded-md bg-[#1F8A8A] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#1A7575] disabled:opacity-40">
                 {pending ? "Saving…" : mode === "create" ? "Create Task" : "Save Changes"}
               </button>
             </div>

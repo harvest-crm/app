@@ -61,8 +61,8 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
         <div className="flex items-center gap-3">
           <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: workspace.color }} />
           <div>
-            <h1 className="text-lg font-semibold text-stone-900">{workspace.name} · Tasks</h1>
-            <p className="text-xs text-stone-400">
+            <h1 className="text-lg font-semibold text-[#0F2540]">{workspace.name} · Tasks</h1>
+            <p className="text-xs text-[#3D5775]">
               {openCount} open task{openCount !== 1 ? "s" : ""}
             </p>
           </div>
@@ -70,7 +70,7 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
         <button
           type="button"
           onClick={() => { setEditingTask(null); setDialogTitle(""); setDialogMode("create"); }}
-          className="flex items-center gap-1.5 rounded-md bg-stone-800 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-stone-900"
+          className="flex items-center gap-1.5 rounded-md bg-[#1F8A8A] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#1A7575]"
         >
           <Plus className="h-4 w-4" />
           New Task
@@ -102,13 +102,13 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
               className={cn(
                 "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                 filter === key
-                  ? "bg-stone-800 text-white"
-                  : "text-stone-500 hover:bg-stone-50 hover:text-stone-700",
+                  ? "bg-[#1F8A8A] text-white"
+                  : "text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]",
               )}
             >
               {label}
               {key === "open" && openCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-stone-200 px-1.5 py-0.5 text-xs font-semibold text-stone-600">
+                <span className="ml-1.5 rounded-full bg-[#E2F0EE] px-1.5 py-0.5 text-xs font-semibold text-[#3D5775]">
                   {openCount}
                 </span>
               )}

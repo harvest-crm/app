@@ -60,7 +60,7 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
+      <h2 className="text-sm font-medium uppercase text-[#1F8A8A]">
         {label}
       </h2>
       {count != null && (
@@ -69,7 +69,7 @@ function SectionHeader({
             "rounded-full px-2 py-0.5 text-xs font-semibold",
             countVariant === "red"
               ? "bg-red-100 text-red-600"
-              : "bg-stone-100 text-stone-600",
+              : "bg-[#E2F0EE] text-[#3D5775]",
           )}
         >
           {count}
@@ -90,8 +90,8 @@ function StatCard({
 }) {
   const inner = (
     <div className="rounded-xl border bg-white p-5 transition-shadow hover:shadow-sm">
-      <p className="text-2xl font-semibold text-stone-900">{value}</p>
-      <p className="mt-1 text-xs text-stone-500">{label}</p>
+      <p className="text-2xl font-semibold text-[#0F2540]">{value}</p>
+      <p className="mt-1 text-xs text-[#3D5775]">{label}</p>
     </div>
   );
   return href ? <a href={href}>{inner}</a> : inner;
@@ -114,17 +114,17 @@ function ReminderRow({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg px-2 py-2.5 hover:bg-stone-50">
+    <div className="flex items-center justify-between gap-4 rounded-lg px-2 py-2.5 hover:bg-[#E2F0EE]">
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-stone-800">{task.title}</p>
-        <p className="text-xs text-amber-600">
+        <p className="truncate text-sm font-medium text-[#0F2540]">{task.title}</p>
+        <p className="text-xs text-[#1F8A8A]">
           {task.reminderAt ? formatReminderTime(task.reminderAt) : ""}
         </p>
       </div>
       <button
         onClick={handleSnooze}
         disabled={pending}
-        className="shrink-0 rounded-md border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-40"
+        className="shrink-0 rounded-md border border-[#E8DFC8] px-2.5 py-1 text-xs font-medium text-[#3D5775] transition-colors hover:bg-[#E2F0EE] disabled:opacity-40"
       >
         {pending ? "…" : "Snooze"}
       </button>
@@ -247,14 +247,14 @@ export function TodayDashboard({
 
       {/* ── No contacts empty state ── */}
       {!hasContacts && (
-        <div className="rounded-xl border-2 border-dashed border-stone-200 p-12 text-center">
-          <p className="font-medium text-stone-700">No contacts yet</p>
-          <p className="mt-1 text-sm text-stone-400">
+        <div className="rounded-xl border-2 border-dashed border-[#E8DFC8] p-12 text-center">
+          <p className="font-medium text-[#3D5775]">No contacts yet</p>
+          <p className="mt-1 text-sm text-[#3D5775]">
             Add your first contact to start tracking your pipeline.
           </p>
           <a
             href="/contacts/new"
-            className="mt-4 inline-block rounded-md bg-stone-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-stone-900"
+            className="mt-4 inline-block rounded-md bg-[#1F8A8A] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1A7575]"
           >
             Add first contact
           </a>
@@ -265,7 +265,7 @@ export function TodayDashboard({
       {overdue.length > 0 && (
         <section className="space-y-3">
           <SectionHeader label="Overdue" count={overdue.length} countVariant="red" />
-          <div className="rounded-xl border border-red-100 bg-white px-2 py-2">
+          <div className="rounded-xl border border-red-200 bg-white px-2 py-2">
             <TaskList tasks={overdue} {...taskListProps} />
           </div>
         </section>
@@ -279,7 +279,7 @@ export function TodayDashboard({
             {today.length > 0 ? (
               <TaskList tasks={today} {...taskListProps} />
             ) : (
-              <p className="py-5 text-center text-sm text-stone-400">
+              <p className="py-5 text-center text-sm text-[#3D5775]">
                 No tasks for today. Nice.
               </p>
             )}
@@ -322,7 +322,7 @@ export function TodayDashboard({
               />
             </div>
           ) : (
-            <p className="text-sm text-stone-400">
+            <p className="text-sm text-[#3D5775]">
               No activity yet. Log a call, email, or note from a contact&apos;s page.
             </p>
           )}

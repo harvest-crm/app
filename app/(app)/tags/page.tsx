@@ -23,7 +23,7 @@ export default async function TagsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-semibold text-stone-900">Tags</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-[#0F2540]">Tags</h1>
       <TagList tags={tags} />
     </div>
   );

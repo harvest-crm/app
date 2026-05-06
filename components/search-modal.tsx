@@ -172,30 +172,30 @@ export function SearchModal() {
       <div className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10">
         {/* Search input */}
         <div className="flex items-center gap-3 border-b px-4">
-          <Search className="h-4 w-4 shrink-0 text-stone-400" />
+          <Search className="h-4 w-4 shrink-0 text-[#3D5775]" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search contacts, deals, tasks, activities…"
-            className="flex-1 py-4 text-sm text-stone-800 outline-none placeholder:text-stone-400"
+            className="flex-1 py-4 text-sm text-[#0F2540] outline-none placeholder:text-[#3D5775]"
           />
           {loading ? (
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-stone-400" />
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-[#3D5775]" />
           ) : (
-            <kbd className="rounded bg-stone-100 px-1.5 py-0.5 text-xs text-stone-400">Esc</kbd>
+            <kbd className="rounded bg-[#E2F0EE] px-1.5 py-0.5 text-xs text-[#3D5775]">Esc</kbd>
           )}
         </div>
 
         {/* Results */}
         <div ref={listRef} className="max-h-[60vh] overflow-y-auto py-2">
           {query.trim().length < 2 ? (
-            <p className="px-4 py-10 text-center text-sm text-stone-400">
+            <p className="px-4 py-10 text-center text-sm text-[#3D5775]">
               Type to search across contacts, deals, tasks, and activities.
             </p>
           ) : results && sections.length === 0 && !loading ? (
-            <p className="px-4 py-10 text-center text-sm text-stone-400">
+            <p className="px-4 py-10 text-center text-sm text-[#3D5775]">
               No results for &ldquo;{query}&rdquo;.
             </p>
           ) : (
@@ -203,7 +203,7 @@ export function SearchModal() {
               const Icon = TYPE_ICONS[type];
               return (
                 <div key={type}>
-                  <p className="px-4 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-stone-400">
+                  <p className="px-4 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-[#3D5775]">
                     {TYPE_LABELS[type]}
                   </p>
                   {items.map((item) => {
@@ -218,23 +218,23 @@ export function SearchModal() {
                         onMouseEnter={() => setHighlightIndex(idx)}
                         className={cn(
                           "flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors",
-                          highlighted ? "bg-blue-50" : "hover:bg-stone-50",
+                          highlighted ? "bg-[#E2F0EE]" : "hover:bg-[#E2F0EE]",
                         )}
                       >
-                        <Icon className="h-4 w-4 shrink-0 text-stone-400" />
+                        <Icon className="h-4 w-4 shrink-0 text-[#3D5775]" />
                         <div className="min-w-0 flex-1">
                           <p className={cn(
                             "truncate text-sm font-medium",
-                            highlighted ? "text-blue-700" : "text-stone-800",
+                            highlighted ? "text-[#1F8A8A]" : "text-[#0F2540]",
                           )}>
                             {item.title}
                           </p>
                           {item.subtitle && (
-                            <p className="truncate text-xs text-stone-400">{item.subtitle}</p>
+                            <p className="truncate text-xs text-[#3D5775]">{item.subtitle}</p>
                           )}
                         </div>
                         {highlighted && (
-                          <kbd className="shrink-0 rounded bg-stone-100 px-1.5 py-0.5 text-xs text-stone-400">
+                          <kbd className="shrink-0 rounded bg-[#E2F0EE] px-1.5 py-0.5 text-xs text-[#3D5775]">
                             ↵
                           </kbd>
                         )}
@@ -249,10 +249,10 @@ export function SearchModal() {
 
         {/* Footer hint */}
         {results && sections.length > 0 && (
-          <div className="flex items-center gap-4 border-t px-4 py-2 text-xs text-stone-400">
-            <span><kbd className="rounded bg-stone-100 px-1 py-0.5">↑↓</kbd> navigate</span>
-            <span><kbd className="rounded bg-stone-100 px-1 py-0.5">↵</kbd> open</span>
-            <span><kbd className="rounded bg-stone-100 px-1 py-0.5">Esc</kbd> close</span>
+          <div className="flex items-center gap-4 border-t px-4 py-2 text-xs text-[#3D5775]">
+            <span><kbd className="rounded bg-[#E2F0EE] px-1 py-0.5">↑↓</kbd> navigate</span>
+            <span><kbd className="rounded bg-[#E2F0EE] px-1 py-0.5">↵</kbd> open</span>
+            <span><kbd className="rounded bg-[#E2F0EE] px-1 py-0.5">Esc</kbd> close</span>
           </div>
         )}
       </div>

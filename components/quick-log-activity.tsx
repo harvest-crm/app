@@ -66,7 +66,7 @@ export function QuickLogActivity({ contactId, dealId, workspaceId, onCreated }: 
                 "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                 active
                   ? `${cfg.bg} ${cfg.text}`
-                  : "bg-stone-50 text-stone-500 hover:bg-stone-100 hover:text-stone-700",
+                  : "bg-[#F5EFE0] text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]",
               )}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -88,7 +88,7 @@ export function QuickLogActivity({ contactId, dealId, workspaceId, onCreated }: 
         rows={3}
         placeholder={`Log a ${activeCfg?.label.toLowerCase() ?? "note"}…`}
         disabled={pending}
-        className="w-full resize-none rounded-md border border-stone-200 px-3 py-2 text-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+        className="w-full resize-none rounded-md border border-[#E8DFC8] px-3 py-2 text-sm placeholder-[#3D5775] focus:outline-none focus:ring-2 focus:ring-[#1F8A8A] disabled:opacity-50"
       />
 
       <div className="flex items-center justify-between gap-3">
@@ -98,13 +98,13 @@ export function QuickLogActivity({ contactId, dealId, workspaceId, onCreated }: 
           value={occurredAt}
           onChange={(e) => setOccurredAt(e.target.value)}
           title="Date/time (defaults to now)"
-          className="rounded border border-stone-200 px-2 py-1 text-xs text-stone-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded border border-[#E8DFC8] px-2 py-1 text-xs text-[#3D5775] focus:outline-none focus:ring-1 focus:ring-[#1F8A8A]"
         />
 
         <button
           type="submit"
           disabled={pending || !body.trim()}
-          className="rounded-md bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-stone-900 disabled:opacity-40"
+          className="rounded-md bg-[#1F8A8A] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#1A7575] disabled:opacity-40"
         >
           {pending ? "Logging…" : "Log activity"}
         </button>

@@ -3,7 +3,7 @@ import { UserProfile } from "@clerk/nextjs";
 export default function ProfilePage() {
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-semibold text-stone-900">Profile</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-[#0F2540]">Profile</h1>
       <UserProfile
         appearance={{
           elements: {

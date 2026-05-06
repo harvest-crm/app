@@ -21,7 +21,7 @@ export function Logo({ size = 24, className }: Props) {
       aria-hidden="true"
     >
       {/* Slate tile */}
-      <rect width="32" height="32" rx="6" fill="#475569" />
+      <rect width="32" height="32" rx="6" fill="#1F8A8A" />
       {/* Vertical bar — centered horizontally, 3 wide, y 4–28 */}
       <rect x="14.5" y="4" width="3" height="24" fill="#FFFFFF" />
       {/* Horizontal bar — 12 wide, 3 tall, centered at x=16, y 11–14 */}

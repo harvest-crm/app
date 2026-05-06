@@ -127,7 +127,7 @@ function TaskRow({
       <div
         className={cn(
           "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-          completed ? "bg-stone-200" : (PRIORITY_DOT[task.priority] ?? "bg-stone-200"),
+          completed ? "bg-[#E2F0EE]" : (PRIORITY_DOT[task.priority] ?? "bg-[#E2F0EE]"),
         )}
         title={`${task.priority} priority`}
       />
@@ -138,11 +138,11 @@ function TaskRow({
         onClick={onToggle}
         className={cn(
           "mt-0.5 shrink-0 transition-colors",
-          completed ? "text-stone-300" : "text-stone-300 hover:text-blue-500",
+          completed ? "text-[#3D5775]" : "text-[#3D5775] hover:text-[#1F8A8A]",
         )}
       >
         {completed ? (
-          <CheckCircle2 className="h-4 w-4 text-stone-300" />
+          <CheckCircle2 className="h-4 w-4 text-[#3D5775]" />
         ) : (
           <Circle className="h-4 w-4" />
         )}
@@ -152,13 +152,13 @@ function TaskRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           {TypeIcon && (
-            <TypeIcon className="h-3.5 w-3.5 shrink-0 text-stone-400" />
+            <TypeIcon className="h-3.5 w-3.5 shrink-0 text-[#3D5775]" />
           )}
           <span
             onClick={onOpenEdit}
             className={cn(
               "cursor-pointer text-sm leading-snug",
-              completed ? "text-stone-400 line-through" : "text-stone-800 hover:text-blue-600",
+              completed ? "text-[#3D5775] line-through" : "text-[#0F2540] hover:text-[#1F8A8A]",
             )}
           >
             {task.title}
@@ -166,7 +166,7 @@ function TaskRow({
         </div>
 
         {task.description && (
-          <p className="mt-0.5 truncate text-xs text-stone-400">
+          <p className="mt-0.5 truncate text-xs text-[#3D5775]">
             {task.description.slice(0, 80)}
           </p>
         )}
@@ -176,14 +176,14 @@ function TaskRow({
             <span
               className={cn(
                 "text-xs",
-                overdue && !completed ? "font-medium text-red-500" : "text-stone-400",
+                overdue && !completed ? "font-medium text-red-500" : "text-[#3D5775]",
               )}
             >
               {formatDue(task.dueAt)}
             </span>
             {task.reminderAt && (
               <span title="Reminder set">
-                <Bell className="h-3 w-3 text-stone-400" />
+                <Bell className="h-3 w-3 text-[#3D5775]" />
               </span>
             )}
           </div>
@@ -191,7 +191,7 @@ function TaskRow({
 
         {confirmDelete && (
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="text-xs text-stone-500">Delete?</span>
+            <span className="text-xs text-[#3D5775]">Delete?</span>
             <button
               onClick={handleDelete}
               disabled={pending}
@@ -201,7 +201,7 @@ function TaskRow({
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="text-xs text-stone-400 hover:text-stone-600"
+              className="text-xs text-[#3D5775] hover:text-[#3D5775]"
             >
               No
             </button>
@@ -215,7 +215,7 @@ function TaskRow({
           type="button"
           onClick={() => setConfirmDelete(true)}
           title="Delete"
-          className="mt-0.5 shrink-0 rounded p-0.5 text-stone-300 opacity-0 transition-opacity hover:bg-red-100 hover:text-red-500 group-hover:opacity-100"
+          className="mt-0.5 shrink-0 rounded p-0.5 text-[#3D5775] opacity-0 transition-opacity hover:bg-red-100 hover:text-red-500 group-hover:opacity-100"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -238,7 +238,7 @@ export function TaskList({
   onDeleted: (id: string) => void;
 }) {
   if (tasks.length === 0) {
-    return <p className="py-4 text-center text-xs text-stone-400">No tasks yet.</p>;
+    return <p className="py-4 text-center text-xs text-[#3D5775]">No tasks yet.</p>;
   }
 
   const { open, done } = sortTasks(tasks);
@@ -259,9 +259,9 @@ export function TaskList({
         <>
           {open.length > 0 && (
             <div className="flex items-center gap-2 py-1.5">
-              <div className="h-px flex-1 bg-stone-100" />
-              <span className="text-xs text-stone-400">Completed</span>
-              <div className="h-px flex-1 bg-stone-100" />
+              <div className="h-px flex-1 bg-[#E2F0EE]" />
+              <span className="text-xs text-[#3D5775]">Completed</span>
+              <div className="h-px flex-1 bg-[#E2F0EE]" />
             </div>
           )}
           {done.map((t) => (

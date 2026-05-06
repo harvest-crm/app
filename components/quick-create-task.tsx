@@ -62,8 +62,8 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
     }
 
     const quickBtnClass =
-      "rounded px-2 py-1 text-xs font-medium text-stone-500 hover:bg-stone-100 hover:text-stone-700 transition-colors";
-    const quickBtnActive = "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700";
+      "rounded px-2 py-1 text-xs font-medium text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775] transition-colors";
+    const quickBtnActive = "bg-[#E2F0EE] text-[#1F8A8A] hover:bg-[#E2F0EE] hover:text-[#1F8A8A]";
 
     return (
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -75,19 +75,19 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
             onChange={(e) => setTitle(e.target.value)}
             placeholder="New task…"
             disabled={pending}
-            className="min-w-0 flex-1 rounded-md border border-stone-200 px-3 py-2 text-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="min-w-0 flex-1 rounded-md border border-[#E8DFC8] px-3 py-2 text-sm placeholder-[#3D5775] focus:outline-none focus:ring-2 focus:ring-[#1F8A8A] disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={pending || !title.trim()}
-            className="rounded-md bg-stone-800 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-stone-900 disabled:opacity-40"
+            className="rounded-md bg-[#1F8A8A] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#1A7575] disabled:opacity-40"
           >
             {pending ? "Adding…" : "Add"}
           </button>
           <button
             type="button"
             onClick={() => onOpenAdvanced(title, dueDate)}
-            className="rounded-md border border-stone-200 px-3 py-2 text-xs font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-700"
+            className="rounded-md border border-[#E8DFC8] px-3 py-2 text-xs font-medium text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]"
           >
             Advanced…
           </button>
@@ -119,7 +119,7 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="rounded border border-stone-200 px-2 py-1 text-xs text-stone-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded border border-[#E8DFC8] px-2 py-1 text-xs text-[#3D5775] focus:outline-none focus:ring-1 focus:ring-[#1F8A8A]"
           />
         </div>
       </form>

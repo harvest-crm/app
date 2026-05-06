@@ -44,18 +44,18 @@ export function WebhookCard({ workspaceId, initialToken, appUrl }: Props) {
 
   return (
     <div className="mt-8 rounded-xl border bg-white p-6">
-      <h2 className="mb-1 text-sm font-semibold text-stone-800">Lead Capture Webhook</h2>
-      <p className="mb-4 text-sm text-stone-500">
+      <h2 className="mb-1 text-sm font-semibold text-[#0F2540]">Lead Capture Webhook</h2>
+      <p className="mb-4 text-sm text-[#3D5775]">
         POST leads to this URL from any website form, MLS, or integration. No auth required — the token is the key.
       </p>
 
       {/* URL row */}
-      <div className="flex items-center gap-2 rounded-lg border bg-stone-50 px-3 py-2.5">
-        <code className="min-w-0 flex-1 break-all text-xs text-stone-700">{webhookUrl}</code>
+      <div className="flex items-center gap-2 rounded-lg border bg-[#F5EFE0] px-3 py-2.5">
+        <code className="min-w-0 flex-1 break-all text-xs text-[#3D5775]">{webhookUrl}</code>
         <button
           type="button"
           onClick={copyUrl}
-          className="shrink-0 rounded p-1 text-stone-400 hover:bg-stone-200 hover:text-stone-600"
+          className="shrink-0 rounded p-1 text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]"
           title="Copy URL"
         >
           {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
@@ -64,10 +64,10 @@ export function WebhookCard({ workspaceId, initialToken, appUrl }: Props) {
 
       {/* Sample curl */}
       <details className="mt-4">
-        <summary className="cursor-pointer text-xs font-medium text-stone-500 hover:text-stone-700">
+        <summary className="cursor-pointer text-xs font-medium text-[#3D5775] hover:text-[#3D5775]">
           Sample curl command
         </summary>
-        <pre className="mt-2 overflow-x-auto rounded-lg bg-stone-900 p-3 text-xs text-stone-300">
+        <pre className="mt-2 overflow-x-auto rounded-lg bg-[#0F2540] p-3 text-xs text-[#3D5775]">
           {curlSample}
         </pre>
       </details>
@@ -76,7 +76,7 @@ export function WebhookCard({ workspaceId, initialToken, appUrl }: Props) {
       <div className="mt-4 border-t pt-4">
         {confirming ? (
           <div className="flex items-center gap-3">
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-[#3D5775]">
               This will break any forms using the current URL. Continue?
             </p>
             <button
@@ -88,7 +88,7 @@ export function WebhookCard({ workspaceId, initialToken, appUrl }: Props) {
             </button>
             <button
               onClick={() => setConfirming(false)}
-              className="text-sm text-stone-400 hover:text-stone-600"
+              className="text-sm text-[#3D5775] hover:text-[#3D5775]"
             >
               Cancel
             </button>
@@ -97,7 +97,7 @@ export function WebhookCard({ workspaceId, initialToken, appUrl }: Props) {
           <button
             type="button"
             onClick={() => setConfirming(true)}
-            className="flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-600"
+            className="flex items-center gap-1.5 text-sm text-[#3D5775] hover:text-[#3D5775]"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Regenerate token

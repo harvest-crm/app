@@ -148,7 +148,7 @@ export default async function ContactDetailPage({
   return (
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-stone-900">
+        <h1 className="text-2xl font-semibold text-[#0F2540]">
           {contact.firstName} {contact.lastName}
         </h1>
         <DeleteContactButton contactId={contact.id} />
@@ -157,14 +157,14 @@ export default async function ContactDetailPage({
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
           <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Details
             </h2>
             <ContactForm contact={contact} />
           </div>
 
           <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Custom Fields
             </h2>
             {fieldGroups.length > 0 ? (
@@ -175,28 +175,28 @@ export default async function ContactDetailPage({
                 entityId={contact.id}
               />
             ) : (
-              <p className="text-sm text-stone-400">
+              <p className="text-sm text-[#3D5775]">
                 Add this contact to a workspace to see custom fields.
               </p>
             )}
           </div>
 
           <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Documents
             </h2>
             <DocumentsFeed initialDocuments={docs} contactId={contact.id} />
           </div>
 
           <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Tasks
             </h2>
             <TasksFeed initialTasks={tasks} contactId={contact.id} />
           </div>
 
           <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Activity
             </h2>
             <ActivityFeed initialActivities={activities} contactId={contact.id} />
@@ -205,7 +205,7 @@ export default async function ContactDetailPage({
 
         <div className="space-y-4">
           <div className="rounded-lg border bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Tags
             </h2>
             <ContactTagManager
@@ -216,7 +216,7 @@ export default async function ContactDetailPage({
           </div>
 
           <div className="rounded-lg border bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
               Workspaces
             </h2>
             <ContactWorkspaceManager

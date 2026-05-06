@@ -18,10 +18,10 @@ import type { SerializedActivity } from "@/app/actions/activities";
 // ── Config (exported so QuickLogActivity can reuse) ───────────────────────────
 
 export const ACTIVITY_TYPE_CONFIG = {
-  call:    { icon: Phone,         bg: "bg-blue-50",   text: "text-blue-600",   label: "Call"    },
+  call:    { icon: Phone,         bg: "bg-[#E2F0EE]",   text: "text-[#1F8A8A]",   label: "Call"    },
   email:   { icon: Mail,          bg: "bg-indigo-50", text: "text-indigo-600", label: "Email"   },
   meeting: { icon: Calendar,      bg: "bg-purple-50", text: "text-purple-600", label: "Meeting" },
-  note:    { icon: FileText,      bg: "bg-stone-100", text: "text-stone-500",  label: "Note"    },
+  note:    { icon: FileText,      bg: "bg-[#E2F0EE]", text: "text-[#3D5775]",  label: "Note"    },
   sms:     { icon: MessageSquare, bg: "bg-green-50",  text: "text-green-600",  label: "SMS"     },
 } as const;
 
@@ -99,7 +99,7 @@ function ActivityItem({
   }
 
   return (
-    <div className="group flex gap-3 rounded-lg p-2 transition-colors hover:bg-stone-50">
+    <div className="group flex gap-3 rounded-lg p-2 transition-colors hover:bg-[#E2F0EE]">
       {/* Type icon */}
       <div
         className={cn(
@@ -114,7 +114,7 @@ function ActivityItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className={cn("text-xs font-semibold", cfg.text)}>{cfg.label}</span>
-          <span className="text-xs text-stone-400">{formatOccurredAt(activity.occurredAt)}</span>
+          <span className="text-xs text-[#3D5775]">{formatOccurredAt(activity.occurredAt)}</span>
         </div>
 
         {editing ? (
@@ -124,13 +124,13 @@ function ActivityItem({
               onChange={(e) => setEditBody(e.target.value)}
               rows={3}
               autoFocus
-              className="w-full rounded-md border border-stone-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-[#E8DFC8] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1F8A8A]"
             />
             <div className="flex gap-3">
               <button
                 onClick={handleSave}
                 disabled={pending || !editBody.trim()}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-40"
+                className="text-xs font-semibold text-[#1F8A8A] hover:text-[#1F8A8A] disabled:opacity-40"
               >
                 {pending ? "Saving…" : "Save"}
               </button>
@@ -139,20 +139,20 @@ function ActivityItem({
                   setEditing(false);
                   setEditBody(activity.body);
                 }}
-                className="text-xs text-stone-400 hover:text-stone-600"
+                className="text-xs text-[#3D5775] hover:text-[#3D5775]"
               >
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <p className="mt-0.5 whitespace-pre-wrap text-sm text-stone-700">{activity.body}</p>
+          <p className="mt-0.5 whitespace-pre-wrap text-sm text-[#3D5775]">{activity.body}</p>
         )}
 
         {contactInfo && (
           <a
             href={`/contacts/${contactInfo.id}`}
-            className="mt-0.5 block text-xs text-blue-600 hover:underline"
+            className="mt-0.5 block text-xs text-[#1F8A8A] hover:underline"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
           >
@@ -163,7 +163,7 @@ function ActivityItem({
         {/* Inline delete confirm */}
         {!editing && confirmDelete && (
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="text-xs text-stone-500">Delete this activity?</span>
+            <span className="text-xs text-[#3D5775]">Delete this activity?</span>
             <button
               onClick={handleDelete}
               disabled={pending}
@@ -173,7 +173,7 @@ function ActivityItem({
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="text-xs text-stone-400 hover:text-stone-600"
+              className="text-xs text-[#3D5775] hover:text-[#3D5775]"
             >
               No
             </button>
@@ -187,14 +187,14 @@ function ActivityItem({
           <button
             onClick={() => setEditing(true)}
             title="Edit"
-            className="rounded p-1 text-stone-400 hover:bg-stone-200 hover:text-stone-600"
+            className="rounded p-1 text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]"
           >
             <Pencil className="h-3 w-3" />
           </button>
           <button
             onClick={() => setConfirmDelete(true)}
             title="Delete"
-            className="rounded p-1 text-stone-400 hover:bg-red-100 hover:text-red-600"
+            className="rounded p-1 text-[#3D5775] hover:bg-red-100 hover:text-red-600"
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -221,7 +221,7 @@ export function ActivityTimeline({
 }) {
   if (activities.length === 0) {
     return (
-      <p className="py-6 text-center text-xs text-stone-400">
+      <p className="py-6 text-center text-xs text-[#3D5775]">
         No activity yet. Log a call, email, meeting, or note above.
       </p>
     );

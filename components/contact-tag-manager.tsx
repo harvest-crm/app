@@ -53,7 +53,7 @@ export function ContactTagManager({ contactId, contactTags, allTags }: Props) {
           </span>
         ))}
         {contactTags.length === 0 && (
-          <span className="text-xs text-stone-400">No tags applied</span>
+          <span className="text-xs text-[#3D5775]">No tags applied</span>
         )}
       </div>
 

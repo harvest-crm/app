@@ -66,8 +66,8 @@ export default async function WorkspaceFieldsPage({
       <div className="mb-8 flex items-center gap-3">
         <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: workspace.color }} />
         <div>
-          <h1 className="text-2xl font-semibold text-stone-900">{workspace.name}</h1>
-          <p className="text-sm text-stone-500">Custom Fields</p>
+          <h1 className="text-2xl font-semibold text-[#0F2540]">{workspace.name}</h1>
+          <p className="text-sm text-[#3D5775]">Custom Fields</p>
         </div>
       </div>
 

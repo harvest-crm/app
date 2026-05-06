@@ -114,18 +114,18 @@ export function UploadDocument({ contactId, dealId, onUploaded }: Props) {
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 text-center transition-colors",
           isDragOver && !uploading
-            ? "border-blue-400 bg-blue-50"
-            : "border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-white",
+            ? "border-[#D0E5E2] bg-[#E2F0EE]"
+            : "border-[#E8DFC8] bg-[#F5EFE0] hover:border-[#E8DFC8] hover:bg-white",
           uploading && "cursor-not-allowed opacity-60",
         )}
       >
-        <Upload className="h-7 w-7 text-stone-300" />
+        <Upload className="h-7 w-7 text-[#3D5775]" />
         <div>
-          <p className="text-sm font-medium text-stone-500">
+          <p className="text-sm font-medium text-[#3D5775]">
             {uploading ? "Uploading…" : "Drop files here"}
           </p>
           {!uploading && (
-            <p className="text-xs text-stone-400">or click to browse · max 50 MB</p>
+            <p className="text-xs text-[#3D5775]">or click to browse · max 50 MB</p>
           )}
         </div>
       </div>
@@ -134,12 +134,12 @@ export function UploadDocument({ contactId, dealId, onUploaded }: Props) {
       {uploading && currentFileName && (
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center justify-between">
-            <p className="max-w-xs truncate text-xs text-stone-500">{currentFileName}</p>
-            <p className="text-xs text-stone-400">{progress}%</p>
+            <p className="max-w-xs truncate text-xs text-[#3D5775]">{currentFileName}</p>
+            <p className="text-xs text-[#3D5775]">{progress}%</p>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#E2F0EE]">
             <div
-              className="h-1.5 rounded-full bg-blue-500 transition-all duration-100"
+              className="h-1.5 rounded-full bg-[#E2F0EE]0 transition-all duration-100"
               style={{ width: `${progress}%` }}
             />
           </div>

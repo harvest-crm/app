@@ -20,8 +20,8 @@ export default async function WorkspacesSettingsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="mb-2 text-2xl font-semibold text-stone-900">Workspaces</h1>
-      <p className="mb-6 text-sm text-stone-500">
+      <h1 className="mb-2 text-2xl font-semibold text-[#0F2540]">Workspaces</h1>
+      <p className="mb-6 text-sm text-[#3D5775]">
         Each workspace is a pipeline with its own stages, templates, and settings.
       </p>
       <WorkspaceList workspaces={workspaces} />

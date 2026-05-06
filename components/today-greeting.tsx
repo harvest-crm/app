@@ -16,12 +16,12 @@ export function TodayGreeting({ name, pipelineSummary }: Props) {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold tracking-tight text-stone-900">
+      <h1 className="text-3xl font-semibold tracking-tight text-[#0F2540]">
         {greeting}, {name}.
       </h1>
-      <p className="mt-1 text-sm text-stone-400">{date}</p>
+      <p className="mt-1 text-sm text-[#3D5775]">{date}</p>
       {pipelineSummary && (
-        <p className="mt-1 text-sm text-stone-500">{pipelineSummary}</p>
+        <p className="mt-1 text-sm text-[#3D5775]">{pipelineSummary}</p>
       )}
     </div>
   );

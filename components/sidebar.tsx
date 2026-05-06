@@ -8,12 +8,18 @@ import { Logo } from "@/components/logo";
 import { useSearch } from "@/components/search-modal";
 import type { Workspace } from "@/app/generated/prisma/client";
 
-// Exact hex locks — no Tailwind color name drift
-// #FAFAF9 = warm off-white (not yellow)
-// #F5F5F4 = subtle warm gray for active/hover
-// #E7E5E4 = border
-// #1C1917 = near-black primary text
-// #78716C = muted secondary text
+// Locked palette — no Tailwind color names
+const C = {
+  canvas:        "#F5EFE0",
+  border:        "#E8DFC8",
+  navy:          "#0F2540",
+  navySecondary: "#3D5775",
+  teal:          "#1F8A8A",
+  tealHover:     "#1A7575",
+  tealTint:      "#E2F0EE",
+  inputBg:       "#FBF8F0",
+  white:         "#FFFFFF",
+} as const;
 
 const NAV_ITEMS = [
   { href: "/today",    label: "Today",    icon: Home },
@@ -27,18 +33,22 @@ export function Sidebar({ workspaces }: SidebarProps) {
   const pathname    = usePathname();
   const { setOpen } = useSearch();
 
+  function navLink(href: string, active: boolean) {
+    return {
+      background: active ? C.tealTint : "transparent",
+      color:      active ? C.teal     : C.navySecondary,
+    };
+  }
+
   return (
     <aside
       className="flex h-screen w-56 flex-col border-r"
-      style={{ background: "#FAFAF9", borderColor: "#E7E5E4", color: "#1C1917" }}
+      style={{ background: C.canvas, borderColor: C.border, color: C.navy }}
     >
       {/* Brand */}
-      <div
-        className="flex items-center gap-2.5 border-b px-4 py-3.5"
-        style={{ borderColor: "#E7E5E4" }}
-      >
+      <div className="flex items-center gap-2.5 border-b px-4 py-3.5" style={{ borderColor: C.border }}>
         <Logo size={20} />
-        <span className="text-sm font-semibold tracking-tight" style={{ color: "#1C1917" }}>
+        <span className="text-sm font-semibold tracking-tight" style={{ color: C.navy }}>
           Covenant CRM
         </span>
       </div>
@@ -49,29 +59,22 @@ export function Sidebar({ workspaces }: SidebarProps) {
           type="button"
           onClick={() => setOpen(true)}
           className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors"
-          style={{
-            background: "#FFFFFF",
-            border: "1px solid #E7E5E4",
-            color: "#A8A29E",
-          }}
+          style={{ background: C.inputBg, border: `1px solid ${C.border}`, color: C.navySecondary }}
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
           <span className="flex-1 text-left">Search…</span>
-          <kbd style={{ color: "#D6D3D1" }}>⌘K</kbd>
+          <kbd style={{ color: C.border }}>⌘K</kbd>
         </button>
       </div>
 
       {/* Org switcher */}
-      <div
-        className="flex h-14 items-center border-b px-3"
-        style={{ borderColor: "#E7E5E4" }}
-      >
+      <div className="flex h-14 items-center border-b px-3" style={{ borderColor: C.border }}>
         <OrganizationSwitcher
           appearance={{
             elements: {
               rootBox: "w-full",
               organizationSwitcherTrigger:
-                "w-full justify-start gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-[#F5F5F4]",
+                `w-full justify-start gap-2 rounded-md px-2 py-1.5 text-sm`,
             },
           }}
         />
@@ -87,15 +90,12 @@ export function Sidebar({ workspaces }: SidebarProps) {
                 <Link
                   href={href}
                   className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors"
-                  style={{
-                    background: active ? "#F5F5F4" : "transparent",
-                    color: active ? "#1C1917" : "#78716C",
-                  }}
+                  style={navLink(href, active)}
                   onMouseEnter={(e) => {
-                    if (!active) (e.currentTarget as HTMLElement).style.background = "#F5F5F4";
+                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: C.tealTint, color: C.navy });
                   }}
                   onMouseLeave={(e) => {
-                    if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: C.navySecondary });
                   }}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -109,8 +109,8 @@ export function Sidebar({ workspaces }: SidebarProps) {
         {workspaces.length > 0 && (
           <div className="mt-6 px-2">
             <p
-              className="mb-1 px-2.5 text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "#A8A29E" }}
+              className="mb-1 px-2.5 font-medium uppercase"
+              style={{ color: C.teal, fontSize: "11px", letterSpacing: "0.06em" }}
             >
               Workspaces
             </p>
@@ -122,21 +122,15 @@ export function Sidebar({ workspaces }: SidebarProps) {
                     <Link
                       href={`/workspaces/${ws.slug}`}
                       className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors"
-                      style={{
-                        background: active ? "#F5F5F4" : "transparent",
-                        color: active ? "#1C1917" : "#78716C",
-                      }}
+                      style={navLink(`/workspaces/${ws.slug}`, active)}
                       onMouseEnter={(e) => {
-                        if (!active) (e.currentTarget as HTMLElement).style.background = "#F5F5F4";
+                        if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: C.tealTint, color: C.navy });
                       }}
                       onMouseLeave={(e) => {
-                        if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                        if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: C.navySecondary });
                       }}
                     >
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: ws.color }}
-                      />
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: ws.color }} />
                       <Building2 className="h-4 w-4 shrink-0" />
                       <span className="truncate">{ws.name}</span>
                     </Link>
@@ -149,8 +143,8 @@ export function Sidebar({ workspaces }: SidebarProps) {
 
         <div className="mt-6 px-2">
           <p
-            className="mb-1 px-2.5 text-xs font-semibold uppercase tracking-wider"
-            style={{ color: "#A8A29E" }}
+            className="mb-1 px-2.5 font-medium uppercase"
+            style={{ color: C.teal, fontSize: "11px", letterSpacing: "0.06em" }}
           >
             Settings
           </p>
@@ -165,15 +159,12 @@ export function Sidebar({ workspaces }: SidebarProps) {
                   <Link
                     href={href}
                     className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors"
-                    style={{
-                      background: active ? "#F5F5F4" : "transparent",
-                      color: active ? "#1C1917" : "#78716C",
-                    }}
+                    style={navLink(href, active)}
                     onMouseEnter={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.background = "#F5F5F4";
+                      if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: C.tealTint, color: C.navy });
                     }}
                     onMouseLeave={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                      if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: C.navySecondary });
                     }}
                   >
                     <Settings className="h-4 w-4 shrink-0" />
@@ -187,14 +178,9 @@ export function Sidebar({ workspaces }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div
-        className="flex items-center gap-2 border-t px-3 py-3"
-        style={{ borderColor: "#E7E5E4" }}
-      >
-        <UserButton
-          appearance={{ elements: { userButtonAvatarBox: "h-7 w-7" } }}
-        />
-        <span className="text-xs" style={{ color: "#A8A29E" }}>Account</span>
+      <div className="flex items-center gap-2 border-t px-3 py-3" style={{ borderColor: C.border }}>
+        <UserButton appearance={{ elements: { userButtonAvatarBox: "h-7 w-7" } }} />
+        <span className="text-xs" style={{ color: C.navySecondary }}>Account</span>
       </div>
     </aside>
   );

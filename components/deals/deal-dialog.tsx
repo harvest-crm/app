@@ -183,7 +183,7 @@ export function DealDialog({
   const otherContacts = contacts.filter((c) => !c.isInWorkspace);
 
   const selectClass =
-    "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50";
+    "w-full rounded-md border border-[#E8DFC8] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1F8A8A] disabled:opacity-50";
 
   return (
     <div
@@ -195,13 +195,13 @@ export function DealDialog({
       <div className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b px-5 py-4">
-          <h2 className="text-base font-semibold text-stone-800">
+          <h2 className="text-base font-semibold text-[#0F2540]">
             {mode === "create" ? "New Deal" : "Edit Deal"}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+            className="rounded-md p-1 text-[#3D5775] hover:bg-[#E2F0EE] hover:text-[#3D5775]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -275,7 +275,7 @@ export function DealDialog({
             <div className="space-y-1.5">
               <Label htmlFor="notes">
                 Notes{" "}
-                <span className="font-normal text-stone-400">(optional)</span>
+                <span className="font-normal text-[#3D5775]">(optional)</span>
               </Label>
               <Textarea id="notes" rows={3} {...register("notes")} />
             </div>
@@ -291,7 +291,7 @@ export function DealDialog({
                 <div>
                   {confirmDelete ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-stone-500">Sure?</span>
+                      <span className="text-xs text-[#3D5775]">Sure?</span>
                       <button
                         type="button"
                         onClick={handleDelete}
@@ -303,7 +303,7 @@ export function DealDialog({
                       <button
                         type="button"
                         onClick={() => setConfirmDelete(false)}
-                        className="text-xs text-stone-400 hover:text-stone-600"
+                        className="text-xs text-[#3D5775] hover:text-[#3D5775]"
                       >
                         Cancel
                       </button>
@@ -339,12 +339,12 @@ export function DealDialog({
               <button
                 type="button"
                 onClick={() => setCfOpen((o) => !o)}
-                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-400 hover:text-stone-600"
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#3D5775] hover:text-[#3D5775]"
               >
                 <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", cfOpen && "rotate-90")} />
                 Custom Fields
                 {cfLoaded && cfDefs.length > 0 && (
-                  <span className="ml-auto font-normal normal-case text-stone-400">
+                  <span className="ml-auto font-normal normal-case text-[#3D5775]">
                     {cfDefs.length}
                   </span>
                 )}
@@ -361,15 +361,15 @@ export function DealDialog({
                         entityId={deal.id}
                       />
                     ) : (
-                      <p className="text-xs text-stone-400">
+                      <p className="text-xs text-[#3D5775]">
                         No custom fields defined for this workspace.{" "}
-                        <a href={`/workspaces/${deal.workspaceId}/fields`} className="text-blue-600 hover:underline">
+                        <a href={`/workspaces/${deal.workspaceId}/fields`} className="text-[#1F8A8A] hover:underline">
                           Add fields
                         </a>
                       </p>
                     )
                   ) : (
-                    <p className="py-3 text-center text-xs text-stone-400">Loading…</p>
+                    <p className="py-3 text-center text-xs text-[#3D5775]">Loading…</p>
                   )}
                 </div>
               )}
@@ -382,12 +382,12 @@ export function DealDialog({
               <button
                 type="button"
                 onClick={() => setDocsOpen((o) => !o)}
-                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-400 hover:text-stone-600"
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#3D5775] hover:text-[#3D5775]"
               >
                 <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", docsOpen && "rotate-90")} />
                 Documents
                 {docsLoaded && docsList.length > 0 && (
-                  <span className="ml-auto font-normal normal-case text-stone-400">
+                  <span className="ml-auto font-normal normal-case text-[#3D5775]">
                     {docsList.length}
                   </span>
                 )}
@@ -401,7 +401,7 @@ export function DealDialog({
                       dealId={deal.id}
                     />
                   ) : (
-                    <p className="py-4 text-center text-xs text-stone-400">Loading…</p>
+                    <p className="py-4 text-center text-xs text-[#3D5775]">Loading…</p>
                   )}
                 </div>
               )}
@@ -414,7 +414,7 @@ export function DealDialog({
               <button
                 type="button"
                 onClick={() => setTasksOpen((o) => !o)}
-                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-400 hover:text-stone-600"
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#3D5775] hover:text-[#3D5775]"
               >
                 <ChevronRight
                   className={cn(
@@ -424,7 +424,7 @@ export function DealDialog({
                 />
                 Tasks
                 {tasksLoaded && dealTasks.length > 0 && (
-                  <span className="ml-auto font-normal normal-case text-stone-400">
+                  <span className="ml-auto font-normal normal-case text-[#3D5775]">
                     {dealTasks.filter((t) => !t.completedAt).length} open
                   </span>
                 )}
@@ -441,7 +441,7 @@ export function DealDialog({
                       workspaceId={deal.workspaceId}
                     />
                   ) : (
-                    <p className="py-4 text-center text-xs text-stone-400">Loading…</p>
+                    <p className="py-4 text-center text-xs text-[#3D5775]">Loading…</p>
                   )}
                 </div>
               )}
@@ -454,7 +454,7 @@ export function DealDialog({
               <button
                 type="button"
                 onClick={() => setActivityOpen((o) => !o)}
-                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-400 hover:text-stone-600"
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#3D5775] hover:text-[#3D5775]"
               >
                 <ChevronRight
                   className={cn(
@@ -464,7 +464,7 @@ export function DealDialog({
                 />
                 Activity
                 {activitiesLoaded && dealActivities.length > 0 && (
-                  <span className="ml-auto font-normal normal-case text-stone-400">
+                  <span className="ml-auto font-normal normal-case text-[#3D5775]">
                     {dealActivities.length}
                   </span>
                 )}
@@ -481,7 +481,7 @@ export function DealDialog({
                       workspaceId={deal.workspaceId}
                     />
                   ) : (
-                    <p className="py-4 text-center text-xs text-stone-400">Loading…</p>
+                    <p className="py-4 text-center text-xs text-[#3D5775]">Loading…</p>
                   )}
                 </div>
               )}

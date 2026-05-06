@@ -38,7 +38,7 @@ export function ContactWorkspaceManager({ contactId, contactWorkspaces, allWorks
     <div className="space-y-3">
       <div className="space-y-1.5">
         {contactWorkspaces.map((cw) => (
-          <div key={cw.workspaceId} className="flex items-center justify-between rounded-md bg-stone-50 px-2.5 py-1.5 text-sm">
+          <div key={cw.workspaceId} className="flex items-center justify-between rounded-md bg-[#F5EFE0] px-2.5 py-1.5 text-sm">
             <span className="flex items-center gap-2">
               <span
                 className="h-2 w-2 rounded-full"
@@ -49,7 +49,7 @@ export function ContactWorkspaceManager({ contactId, contactWorkspaces, allWorks
             <button
               onClick={() => remove(cw.workspaceId)}
               disabled={pending}
-              className="text-stone-400 hover:text-red-500"
+              className="text-[#3D5775] hover:text-red-500"
               aria-label={`Remove from ${cw.workspace.name}`}
             >
               <X className="h-3.5 w-3.5" />
@@ -57,7 +57,7 @@ export function ContactWorkspaceManager({ contactId, contactWorkspaces, allWorks
           </div>
         ))}
         {contactWorkspaces.length === 0 && (
-          <span className="text-xs text-stone-400">Not in any workspace</span>
+          <span className="text-xs text-[#3D5775]">Not in any workspace</span>
         )}
       </div>
 
