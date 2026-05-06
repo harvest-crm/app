@@ -14,13 +14,16 @@ import { createDeal, updateDeal, deleteDeal } from "@/app/actions/deals";
 import { listActivitiesForDeal } from "@/app/actions/activities";
 import { listTasksForDeal } from "@/app/actions/tasks";
 import { listDefinitionsForWorkspace, getValuesForEntity } from "@/app/actions/custom-fields";
+import { listDocumentsForDeal } from "@/app/actions/documents";
 import { ActivityFeed } from "@/components/activity-feed";
 import { TasksFeed } from "@/components/tasks-feed";
+import { DocumentsFeed } from "@/components/documents-feed";
 import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
 import type { SerializedDeal, SerializedStage, ContactOption } from "./types";
 import type { SerializedActivity } from "@/app/actions/activities";
 import type { SerializedTask } from "@/app/actions/tasks";
 import type { SerializedFieldDef } from "@/app/actions/custom-fields";
+import type { SerializedDocument } from "@/app/actions/documents";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -79,6 +82,20 @@ export function DealDialog({
       });
     }
   }, [cfOpen, cfLoaded, deal]);
+
+  // Documents section
+  const [docsOpen,   setDocsOpen]   = useState(false);
+  const [docsList,   setDocsList]   = useState<SerializedDocument[]>([]);
+  const [docsLoaded, setDocsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (docsOpen && !docsLoaded && deal) {
+      listDocumentsForDeal(deal.id).then((rows) => {
+        setDocsList(rows);
+        setDocsLoaded(true);
+      });
+    }
+  }, [docsOpen, docsLoaded, deal]);
 
   // Tasks section
   const [tasksOpen, setTasksOpen] = useState(false);
@@ -353,6 +370,38 @@ export function DealDialog({
                     )
                   ) : (
                     <p className="py-3 text-center text-xs text-slate-400">Loading…</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Documents section — edit mode only */}
+          {mode === "edit" && deal && (
+            <div className="border-t">
+              <button
+                type="button"
+                onClick={() => setDocsOpen((o) => !o)}
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 hover:text-slate-600"
+              >
+                <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", docsOpen && "rotate-90")} />
+                Documents
+                {docsLoaded && docsList.length > 0 && (
+                  <span className="ml-auto font-normal normal-case text-slate-400">
+                    {docsList.length}
+                  </span>
+                )}
+              </button>
+              {docsOpen && (
+                <div className="px-5 pb-4">
+                  {docsLoaded ? (
+                    <DocumentsFeed
+                      key={deal.id + "-docs"}
+                      initialDocuments={docsList}
+                      dealId={deal.id}
+                    />
+                  ) : (
+                    <p className="py-4 text-center text-xs text-slate-400">Loading…</p>
                   )}
                 </div>
               )}

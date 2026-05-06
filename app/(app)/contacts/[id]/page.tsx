@@ -8,10 +8,12 @@ import { DeleteContactButton } from "@/components/delete-contact-button";
 import { TasksFeed } from "@/components/tasks-feed";
 import { ActivityFeed } from "@/components/activity-feed";
 import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
+import { DocumentsFeed } from "@/components/documents-feed";
 import type { SerializedTask } from "@/app/actions/tasks";
 import type { SerializedActivity } from "@/app/actions/activities";
 import type { FieldGroup } from "@/components/custom-fields/field-values-editor";
 import type { SerializedFieldDef } from "@/app/actions/custom-fields";
+import type { SerializedDocument } from "@/app/actions/documents";
 
 export default async function ContactDetailPage({
   params,
@@ -29,7 +31,7 @@ export default async function ContactDetailPage({
 
   if (!org) return null;
 
-  const [contact, allTags, allWorkspaces, rawTasks, rawActivities] =
+  const [contact, allTags, allWorkspaces, rawTasks, rawActivities, rawDocs] =
     await Promise.all([
       db.contact.findFirst({
         where: { id, organizationId: org.id },
@@ -55,6 +57,10 @@ export default async function ContactDetailPage({
         where: { contactId: id, organizationId: org.id },
         orderBy: { occurredAt: "desc" },
         take: 100,
+      }),
+      db.document.findMany({
+        where: { contactId: id, organizationId: org.id },
+        orderBy: { uploadedAt: "desc" },
       }),
     ]);
 
@@ -101,6 +107,17 @@ export default async function ContactDetailPage({
 
   const fieldValues: Record<string, unknown> = {};
   for (const v of rawFieldValues) fieldValues[v.definitionId] = v.value;
+
+  const docs: SerializedDocument[] = rawDocs.map((d) => ({
+    id: d.id,
+    r2Key: d.r2Key,
+    fileName: d.fileName,
+    mimeType: d.mimeType,
+    fileSize: d.fileSize,
+    uploadedAt: d.uploadedAt.toISOString(),
+    contactId: d.contactId,
+    dealId: d.dealId,
+  }));
 
   const tasks: SerializedTask[] = rawTasks.map((t) => ({
     id: t.id,
@@ -162,6 +179,13 @@ export default async function ContactDetailPage({
                 Add this contact to a workspace to see custom fields.
               </p>
             )}
+          </div>
+
+          <div className="rounded-lg border bg-white p-6">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Documents
+            </h2>
+            <DocumentsFeed initialDocuments={docs} contactId={contact.id} />
           </div>
 
           <div className="rounded-lg border bg-white p-6">

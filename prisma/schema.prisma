@@ -236,18 +236,23 @@ model CustomFieldValue {
 }
 
 model Document {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  workspaceId    String
-  workspace      Workspace    @relation(fields: [workspaceId], references: [id])
-  contactId      String?
-  contact        Contact?     @relation(fields: [contactId], references: [id])
-  dealId         String?
-  deal           Deal?        @relation(fields: [dealId], references: [id])
-  r2Key          String
-  fileName       String
-  fileSize       Int
-  mimeType       String
-  uploadedAt     DateTime     @default(now())
+  id                    String        @id @default(cuid())
+  organizationId        String
+  organization          Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspaceId           String?
+  workspace             Workspace?    @relation(fields: [workspaceId], references: [id])
+  contactId             String?
+  contact               Contact?      @relation(fields: [contactId], references: [id])
+  dealId                String?
+  deal                  Deal?         @relation(fields: [dealId], references: [id])
+  r2Key                 String        @unique
+  fileName              String
+  fileSize              Int
+  mimeType              String
+  uploadedByClerkUserId String?
+  uploadedAt            DateTime      @default(now())
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([dealId])
 }
