@@ -57,7 +57,7 @@ type Props = {
 
 // ── Steps ─────────────────────────────────────────────────────────────────────
 
-const inputCls = "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+const inputCls = "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
 
 // ── Main wizard ───────────────────────────────────────────────────────────────
 
@@ -176,7 +176,7 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   const cancelBtn = (
-    <Link href="/contacts" className="text-sm text-slate-400 hover:text-slate-600">
+    <Link href="/contacts" className="text-sm text-stone-400 hover:text-stone-600">
       Cancel
     </Link>
   );
@@ -197,14 +197,14 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
         onClick={() => !parsing && fileInputRef.current?.click()}
         className={cn(
           "flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-12 text-center transition-colors",
-          isDragOver ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white",
+          isDragOver ? "border-blue-400 bg-blue-50" : "border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-white",
           parsing && "pointer-events-none opacity-60",
         )}
       >
-        <Upload className="h-10 w-10 text-slate-300" />
+        <Upload className="h-10 w-10 text-stone-300" />
         <div>
-          <p className="text-base font-medium text-slate-600">{parsing ? "Parsing…" : "Drop your CSV here"}</p>
-          <p className="text-sm text-slate-400">or click to browse · .csv only · max 10 MB</p>
+          <p className="text-base font-medium text-stone-600">{parsing ? "Parsing…" : "Drop your CSV here"}</p>
+          <p className="text-sm text-stone-400">or click to browse · .csv only · max 10 MB</p>
         </div>
       </div>
       <input ref={fileInputRef} type="file" accept=".csv" className="hidden"
@@ -219,17 +219,17 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
   if (step === 2) return (
     <div className="space-y-6">
       <StepHeader step={2} labels={stepLabels} />
-      <p className="text-sm text-slate-500">{total} rows detected. Map each column to a contact field.</p>
+      <p className="text-sm text-stone-500">{total} rows detected. Map each column to a contact field.</p>
 
       <div className="divide-y rounded-xl border bg-white">
         {headers.map((h) => (
           <div key={h} className="flex items-center gap-4 px-4 py-3">
-            <span className="w-48 shrink-0 truncate text-sm font-medium text-slate-700">{h}</span>
-            <span className="text-slate-400">→</span>
+            <span className="w-48 shrink-0 truncate text-sm font-medium text-stone-700">{h}</span>
+            <span className="text-stone-400">→</span>
             <select
               value={mappings[h] ?? "skip"}
               onChange={(e) => setMappings((prev) => ({ ...prev, [h]: e.target.value }))}
-              className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-w-0 flex-1 rounded-md border border-stone-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {FIELD_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
@@ -247,9 +247,9 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
       <div className="flex items-center justify-between">
         {cancelBtn}
         <div className="flex gap-3">
-          <button onClick={() => setStep(1)} className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Back</button>
+          <button onClick={() => setStep(1)} className="rounded-md border border-stone-200 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50">Back</button>
           <button onClick={() => setStep(3)} disabled={!hasRequiredMapping}
-            className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-40">
+            className="rounded-md bg-stone-800 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-900 disabled:opacity-40">
             Continue
           </button>
         </div>
@@ -266,7 +266,7 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
       <div className="space-y-4 rounded-xl border bg-white p-6">
         {workspaces.length > 0 && (
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Add to Workspace</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">Add to Workspace</label>
             <select value={workspaceId} onChange={(e) => setWorkspaceId(e.target.value)} className={inputCls}>
               <option value="">— None —</option>
               {workspaces.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
@@ -275,7 +275,7 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
         )}
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Override Source</label>
+          <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">Override Source</label>
           <select value={sourceOverride} onChange={(e) => setSourceOverride(e.target.value)} className={inputCls}>
             <option value="">— Use CSV value or leave blank —</option>
             {SOURCE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -283,7 +283,7 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Default Temperature</label>
+          <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">Default Temperature</label>
           <select value={temperature} onChange={(e) => setTemperature(e.target.value)} className={inputCls}>
             <option value="hot">Hot</option>
             <option value="warm">Warm</option>
@@ -293,7 +293,7 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
 
         {allTags.length > 0 && (
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Apply Tags to All</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-stone-500">Apply Tags to All</label>
             <div className="flex flex-wrap gap-2">
               {allTags.map((t) => (
                 <label key={t.id} className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
@@ -311,8 +311,8 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
       <div className="flex items-center justify-between">
         {cancelBtn}
         <div className="flex gap-3">
-          <button onClick={() => setStep(2)} className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Back</button>
-          <button onClick={enterPreview} className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900">
+          <button onClick={() => setStep(2)} className="rounded-md border border-stone-200 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50">Back</button>
+          <button onClick={enterPreview} className="rounded-md bg-stone-800 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-900">
             Preview import
           </button>
         </div>
@@ -327,13 +327,13 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
       <StepHeader step={4} labels={stepLabels} />
 
       <div className="rounded-xl border bg-white p-4">
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-stone-700">
           Found <strong>{total}</strong> row{total !== 1 ? "s" : ""}.
           {checkingDuplicates ? " Checking for duplicates…" : (
             duplicateCount > 0 ? ` Of those, ${duplicateCount} look like duplicate${duplicateCount !== 1 ? "s" : ""} (matching email already in your contacts).` : " No duplicates found."
           )}
         </p>
-        <p className="mt-1 text-sm font-semibold text-slate-800">
+        <p className="mt-1 text-sm font-semibold text-stone-800">
           Will import: {Math.max(0, total - duplicateCount)} contact{total - duplicateCount !== 1 ? "s" : ""}
         </p>
       </div>
@@ -342,18 +342,18 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
       {previewCols.length > 0 && (
         <div className="overflow-x-auto rounded-xl border bg-white">
           <table className="w-full text-sm">
-            <thead className="border-b bg-slate-50">
+            <thead className="border-b bg-stone-50">
               <tr>
                 {previewCols.map((c) => (
-                  <th key={c.value} className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{c.label}</th>
+                  <th key={c.value} className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-stone-500">{c.label}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y">
               {previewRows.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50">
+                <tr key={i} className="hover:bg-stone-50">
                   {previewCols.map((c) => (
-                    <td key={c.value} className="max-w-[180px] truncate px-3 py-2 text-slate-700">
+                    <td key={c.value} className="max-w-[180px] truncate px-3 py-2 text-stone-700">
                       {getMappedValue(row, c.value)}
                     </td>
                   ))}
@@ -361,18 +361,18 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
               ))}
             </tbody>
           </table>
-          {total > 10 && <p className="px-3 py-2 text-xs text-slate-400">Showing first 10 of {total} rows</p>}
+          {total > 10 && <p className="px-3 py-2 text-xs text-stone-400">Showing first 10 of {total} rows</p>}
         </div>
       )}
 
       <div className="flex items-center justify-between">
         {cancelBtn}
         <div className="flex gap-3">
-          <button onClick={() => setStep(3)} className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Back</button>
+          <button onClick={() => setStep(3)} className="rounded-md border border-stone-200 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50">Back</button>
           <button
             onClick={handleImport}
             disabled={importing || checkingDuplicates || total === 0}
-            className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-40"
+            className="rounded-md bg-stone-800 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-900 disabled:opacity-40"
           >
             {importing ? "Importing…" : `Import ${Math.max(0, total - duplicateCount)} contacts`}
           </button>
@@ -393,8 +393,8 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
             <Check className="h-5 w-5 text-emerald-600" />
           </div>
           <div>
-            <p className="font-semibold text-slate-800">Import complete</p>
-            <p className="text-sm text-slate-500">
+            <p className="font-semibold text-stone-800">Import complete</p>
+            <p className="text-sm text-stone-500">
               Imported <strong>{importResult.imported}</strong> contact{importResult.imported !== 1 ? "s" : ""} · Skipped <strong>{importResult.skipped}</strong> duplicate{importResult.skipped !== 1 ? "s" : ""}
               {importResult.errors.length > 0 ? ` · ${importResult.errors.length} error${importResult.errors.length !== 1 ? "s" : ""}` : ""}
             </p>
@@ -411,11 +411,11 @@ export function ContactImportWizard({ workspaces, allTags }: Props) {
         )}
 
         <div className="flex gap-3 pt-2">
-          <Link href="/contacts" className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900">
+          <Link href="/contacts" className="rounded-md bg-stone-800 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-900">
             View contacts
           </Link>
           <button onClick={() => { setStep(1); setImportResult(null); setCsvString(""); setHeaders([]); setAllRows([]); }}
-            className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">
+            className="rounded-md border border-stone-200 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50">
             Import another file
           </button>
         </div>
@@ -440,14 +440,14 @@ function StepHeader({ step, labels }: { step: number; labels: string[] }) {
             <div className={cn(
               "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold",
               done    ? "bg-emerald-500 text-white" :
-              current ? "bg-slate-800 text-white"   : "bg-slate-100 text-slate-400",
+              current ? "bg-stone-800 text-white"   : "bg-stone-100 text-stone-400",
             )}>
               {done ? <Check className="h-3.5 w-3.5" /> : n}
             </div>
-            <span className={cn("text-sm", current ? "font-semibold text-slate-800" : "text-slate-400")}>
+            <span className={cn("text-sm", current ? "font-semibold text-stone-800" : "text-stone-400")}>
               {label}
             </span>
-            {i < labels.length - 1 && <span className="text-slate-200">·</span>}
+            {i < labels.length - 1 && <span className="text-stone-200">·</span>}
           </div>
         );
       })}

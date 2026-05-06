@@ -28,7 +28,7 @@ export default async function NewContactPage({
 
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-900">New Contact</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-stone-900">New Contact</h1>
       <ContactForm workspaces={workspaces} defaultWorkspaceId={defaultWorkspaceId} />
     </div>
   );

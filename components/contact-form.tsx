@@ -209,7 +209,7 @@ export function ContactForm({ contact, workspaces, defaultWorkspaceId }: Props) 
         <div className="space-y-1.5">
           <Label htmlFor="homeAnniversary">
             Home Anniversary{" "}
-            <span className="font-normal text-slate-400">(optional)</span>
+            <span className="font-normal text-stone-400">(optional)</span>
           </Label>
           <Input id="homeAnniversary" type="date" {...register("homeAnniversary")} />
         </div>
@@ -240,7 +240,7 @@ export function ContactForm({ contact, workspaces, defaultWorkspaceId }: Props) 
       {!contact && workspaces && workspaces.length > 0 && (
         <div className="space-y-1.5">
           <Label>Assign to Workspaces</Label>
-          <div className="space-y-2 rounded-md border border-slate-200 p-3">
+          <div className="space-y-2 rounded-md border border-stone-200 p-3">
             {workspaces.map((ws) => (
               <label
                 key={ws.id}
@@ -256,7 +256,7 @@ export function ContactForm({ contact, workspaces, defaultWorkspaceId }: Props) 
                         : prev.filter((id) => id !== ws.id)
                     )
                   }
-                  className="rounded border-slate-300"
+                  className="rounded border-stone-300"
                 />
                 {ws.name}
               </label>

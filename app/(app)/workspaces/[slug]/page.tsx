@@ -38,7 +38,7 @@ export default async function WorkspacePage({
     <div className="p-8">
       <div className="mb-6 flex items-center gap-3">
         <span className="h-3 w-3 rounded-full" style={{ backgroundColor: workspace.color }} />
-        <h1 className="text-2xl font-semibold text-slate-900">{workspace.name}</h1>
+        <h1 className="text-2xl font-semibold text-stone-900">{workspace.name}</h1>
       </div>
 
       <div className="flex gap-3">
@@ -55,13 +55,13 @@ export default async function WorkspacePage({
 
       {workspace.stages.length > 0 && (
         <div className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Stages</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">Stages</h2>
           <div className="flex flex-wrap gap-2">
             {workspace.stages.map((stage) => (
               <div key={stage.id} className="rounded-md border bg-white px-3 py-1.5 text-sm">
                 {stage.name}
                 {stage.isTerminal && (
-                  <span className="ml-2 text-xs text-slate-400">({stage.terminalOutcome})</span>
+                  <span className="ml-2 text-xs text-stone-400">({stage.terminalOutcome})</span>
                 )}
               </div>
             ))}

@@ -1,8 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Outer arc: navy C, opens right, ±55° gap -->
-  <path d="M 22.9 25.8 A 12 12 0 1 1 22.9 6.2"
-        stroke="#1E293B" stroke-width="3.5" stroke-linecap="round"/>
-  <!-- Inner arc: warm gold, same geometry, smaller radius -->
-  <path d="M 20.3 22.1 A 7.5 7.5 0 1 1 20.3 9.9"
-        stroke="#D4A574" stroke-width="2.5" stroke-linecap="round"/>
+  <rect width="32" height="32" rx="6" fill="#475569"/>
+  <rect x="14.5" y="4" width="3" height="24" fill="#FFFFFF"/>
+  <rect x="10" y="11" width="12" height="3" fill="#FFFFFF"/>
 </svg>

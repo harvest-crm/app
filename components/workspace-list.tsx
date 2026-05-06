@@ -76,7 +76,7 @@ function WorkspaceRow({ workspace }: { workspace: Workspace }) {
 
   if (editing) {
     return (
-      <div className="flex items-center gap-3 rounded-md border bg-slate-50 px-4 py-3">
+      <div className="flex items-center gap-3 rounded-md border bg-stone-50 px-4 py-3">
         <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
         <Input
           value={name}
@@ -100,9 +100,9 @@ function WorkspaceRow({ workspace }: { workspace: Workspace }) {
       <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: workspace.color }} />
       <div className="flex-1">
         <span className="font-medium">{workspace.name}</span>
-        <span className="ml-2 text-xs text-slate-400">{templateLabel}</span>
+        <span className="ml-2 text-xs text-stone-400">{templateLabel}</span>
       </div>
-      <Link href={`/workspaces/${workspace.slug}`} className="text-slate-400 hover:text-blue-600">
+      <Link href={`/workspaces/${workspace.slug}`} className="text-stone-400 hover:text-blue-600">
         <ExternalLink className="h-4 w-4" />
       </Link>
       <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
@@ -152,8 +152,8 @@ function NewWorkspaceForm({ onCreated }: { onCreated?: () => void }) {
   }
 
   return (
-    <div className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-slate-700">New Workspace</h3>
+    <div className="rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 p-4 space-y-4">
+      <h3 className="text-sm font-semibold text-stone-700">New Workspace</h3>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs">Name</Label>

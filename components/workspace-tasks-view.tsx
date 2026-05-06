@@ -61,8 +61,8 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
         <div className="flex items-center gap-3">
           <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: workspace.color }} />
           <div>
-            <h1 className="text-lg font-semibold text-slate-900">{workspace.name} · Tasks</h1>
-            <p className="text-xs text-slate-400">
+            <h1 className="text-lg font-semibold text-stone-900">{workspace.name} · Tasks</h1>
+            <p className="text-xs text-stone-400">
               {openCount} open task{openCount !== 1 ? "s" : ""}
             </p>
           </div>
@@ -70,7 +70,7 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
         <button
           type="button"
           onClick={() => { setEditingTask(null); setDialogTitle(""); setDialogMode("create"); }}
-          className="flex items-center gap-1.5 rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-slate-900"
+          className="flex items-center gap-1.5 rounded-md bg-stone-800 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-stone-900"
         >
           <Plus className="h-4 w-4" />
           New Task
@@ -102,13 +102,13 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
               className={cn(
                 "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                 filter === key
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
+                  ? "bg-stone-800 text-white"
+                  : "text-stone-500 hover:bg-stone-50 hover:text-stone-700",
               )}
             >
               {label}
               {key === "open" && openCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-slate-200 px-1.5 py-0.5 text-xs font-semibold text-slate-600">
+                <span className="ml-1.5 rounded-full bg-stone-200 px-1.5 py-0.5 text-xs font-semibold text-stone-600">
                   {openCount}
                 </span>
               )}

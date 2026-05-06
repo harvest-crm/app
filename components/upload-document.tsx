@@ -115,17 +115,17 @@ export function UploadDocument({ contactId, dealId, onUploaded }: Props) {
           "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 text-center transition-colors",
           isDragOver && !uploading
             ? "border-blue-400 bg-blue-50"
-            : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white",
+            : "border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-white",
           uploading && "cursor-not-allowed opacity-60",
         )}
       >
-        <Upload className="h-7 w-7 text-slate-300" />
+        <Upload className="h-7 w-7 text-stone-300" />
         <div>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-stone-500">
             {uploading ? "Uploading…" : "Drop files here"}
           </p>
           {!uploading && (
-            <p className="text-xs text-slate-400">or click to browse · max 50 MB</p>
+            <p className="text-xs text-stone-400">or click to browse · max 50 MB</p>
           )}
         </div>
       </div>
@@ -134,10 +134,10 @@ export function UploadDocument({ contactId, dealId, onUploaded }: Props) {
       {uploading && currentFileName && (
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center justify-between">
-            <p className="max-w-xs truncate text-xs text-slate-500">{currentFileName}</p>
-            <p className="text-xs text-slate-400">{progress}%</p>
+            <p className="max-w-xs truncate text-xs text-stone-500">{currentFileName}</p>
+            <p className="text-xs text-stone-400">{progress}%</p>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
             <div
               className="h-1.5 rounded-full bg-blue-500 transition-all duration-100"
               style={{ width: `${progress}%` }}

@@ -4,11 +4,10 @@ type Props = {
 };
 
 /**
- * Covenant CRM logomark — two concentric arcs forming a C.
- * Outer arc: dark navy #1E293B (blends with dark sidebar bg, visible on light).
- * Inner arc: warm gold #D4A574 (the covenant accent, visible on all backgrounds).
- * The layered C suggests two parties bound together.
- * No text — pair with "Covenant CRM" typography.
+ * Covenant CRM logomark — white thin Latin cross on a stone-600 rounded tile.
+ * Vertical bar: 9% width, runs 12.5%–87.5% of height (2:1 below:above crossbar).
+ * Horizontal bar: 37.5% width, 9% height, positioned at ~34% from top.
+ * Tile: #475569 fill, rx proportional to size.
  */
 export function Logo({ size = 24, className }: Props) {
   return (
@@ -21,20 +20,12 @@ export function Logo({ size = 24, className }: Props) {
       className={className}
       aria-hidden="true"
     >
-      {/* Outer arc — navy, C opening to the right, ±55° gap */}
-      <path
-        d="M 22.9 25.8 A 12 12 0 1 1 22.9 6.2"
-        stroke="#1E293B"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-      {/* Inner arc — warm gold, same opening angle, smaller radius */}
-      <path
-        d="M 20.3 22.1 A 7.5 7.5 0 1 1 20.3 9.9"
-        stroke="#D4A574"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
+      {/* Slate tile */}
+      <rect width="32" height="32" rx="6" fill="#475569" />
+      {/* Vertical bar — centered horizontally, 3 wide, y 4–28 */}
+      <rect x="14.5" y="4" width="3" height="24" fill="#FFFFFF" />
+      {/* Horizontal bar — 12 wide, 3 tall, centered at x=16, y 11–14 */}
+      <rect x="10" y="11" width="12" height="3" fill="#FFFFFF" />
     </svg>
   );
 }

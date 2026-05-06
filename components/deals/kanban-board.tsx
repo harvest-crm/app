@@ -67,14 +67,14 @@ function DealCard({
       {...listeners}
       onClick={onClick}
       className={cn(
-        "touch-none cursor-grab select-none rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-shadow",
-        "hover:border-slate-300 hover:shadow-md active:cursor-grabbing",
+        "touch-none cursor-grab select-none rounded-lg border border-stone-200 bg-white p-3 shadow-sm transition-shadow",
+        "hover:border-stone-300 hover:shadow-md active:cursor-grabbing",
         isDragging && "opacity-30",
         isPending && "pointer-events-none cursor-wait opacity-50",
         isOverlay && "rotate-1 cursor-grabbing shadow-xl ring-2 ring-blue-400",
       )}
     >
-      <p className="text-sm font-medium leading-snug text-slate-800">{deal.title}</p>
+      <p className="text-sm font-medium leading-snug text-stone-800">{deal.title}</p>
 
       {deal.contact && (
         <a
@@ -89,7 +89,7 @@ function DealCard({
 
       <div className="mt-2 flex items-center justify-between gap-2">
         {deal.value ? (
-          <span className="text-xs font-semibold text-slate-700">{fmtValue(deal.value)}</span>
+          <span className="text-xs font-semibold text-stone-700">{fmtValue(deal.value)}</span>
         ) : (
           <span />
         )}
@@ -101,7 +101,7 @@ function DealCard({
                 ? "bg-red-100 text-red-600"
                 : days >= 14
                   ? "bg-amber-100 text-amber-600"
-                  : "bg-slate-100 text-slate-500",
+                  : "bg-stone-100 text-stone-500",
             )}
           >
             {days}d
@@ -134,7 +134,7 @@ function KanbanColumn({
   const isLost = stage.isTerminal && stage.terminalOutcome === "lost";
 
   return (
-    <div className="flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <div className="flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-lg border border-stone-200 bg-white">
       {/* Column header */}
       <div
         className={cn(
@@ -143,19 +143,19 @@ function KanbanColumn({
             ? "border-emerald-200 bg-emerald-50"
             : isLost
               ? "border-red-200 bg-red-50"
-              : "border-slate-200 bg-slate-50",
+              : "border-stone-200 bg-stone-50",
         )}
       >
         <div className="min-w-0">
           <p
             className={cn(
               "truncate text-sm font-semibold",
-              isWon ? "text-emerald-800" : isLost ? "text-red-800" : "text-slate-700",
+              isWon ? "text-emerald-800" : isLost ? "text-red-800" : "text-stone-700",
             )}
           >
             {stage.name}
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-0.5 text-xs text-stone-400">
             {deals.length} deal{deals.length !== 1 ? "s" : ""}
             {stageTotal > 0 && ` · ${fmtValue(stageTotal)}`}
           </p>
@@ -181,7 +181,7 @@ function KanbanColumn({
           />
         ))}
         {deals.length === 0 && isFirst && (
-          <p className="py-8 text-center text-xs text-slate-300">Drag deals here</p>
+          <p className="py-8 text-center text-xs text-stone-300">Drag deals here</p>
         )}
       </div>
     </div>
@@ -376,7 +376,7 @@ export function KanbanBoard({
           newDealDisabled
         />
         <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-stone-500">
             This workspace has no stages set up. Add stages in workspace settings.
           </p>
         </div>
@@ -466,11 +466,11 @@ function BoardHeader({
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: workspace.color }} />
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">{workspace.name} · Deals</h1>
+          <h1 className="text-lg font-semibold text-stone-900">{workspace.name} · Deals</h1>
           {pipelineValue > 0 && (
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-400">
               Pipeline:{" "}
-              <span className="font-semibold text-slate-600">
+              <span className="font-semibold text-stone-600">
                 {new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: "USD",

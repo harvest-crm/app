@@ -60,7 +60,7 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
         {label}
       </h2>
       {count != null && (
@@ -69,7 +69,7 @@ function SectionHeader({
             "rounded-full px-2 py-0.5 text-xs font-semibold",
             countVariant === "red"
               ? "bg-red-100 text-red-600"
-              : "bg-slate-100 text-slate-600",
+              : "bg-stone-100 text-stone-600",
           )}
         >
           {count}
@@ -90,8 +90,8 @@ function StatCard({
 }) {
   const inner = (
     <div className="rounded-xl border bg-white p-5 transition-shadow hover:shadow-sm">
-      <p className="text-2xl font-semibold text-slate-900">{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{label}</p>
+      <p className="text-2xl font-semibold text-stone-900">{value}</p>
+      <p className="mt-1 text-xs text-stone-500">{label}</p>
     </div>
   );
   return href ? <a href={href}>{inner}</a> : inner;
@@ -114,9 +114,9 @@ function ReminderRow({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg px-2 py-2.5 hover:bg-slate-50">
+    <div className="flex items-center justify-between gap-4 rounded-lg px-2 py-2.5 hover:bg-stone-50">
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-slate-800">{task.title}</p>
+        <p className="truncate text-sm font-medium text-stone-800">{task.title}</p>
         <p className="text-xs text-amber-600">
           {task.reminderAt ? formatReminderTime(task.reminderAt) : ""}
         </p>
@@ -124,7 +124,7 @@ function ReminderRow({
       <button
         onClick={handleSnooze}
         disabled={pending}
-        className="shrink-0 rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-40"
+        className="shrink-0 rounded-md border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-40"
       >
         {pending ? "…" : "Snooze"}
       </button>
@@ -247,14 +247,14 @@ export function TodayDashboard({
 
       {/* ── No contacts empty state ── */}
       {!hasContacts && (
-        <div className="rounded-xl border-2 border-dashed border-slate-200 p-12 text-center">
-          <p className="font-medium text-slate-700">No contacts yet</p>
-          <p className="mt-1 text-sm text-slate-400">
+        <div className="rounded-xl border-2 border-dashed border-stone-200 p-12 text-center">
+          <p className="font-medium text-stone-700">No contacts yet</p>
+          <p className="mt-1 text-sm text-stone-400">
             Add your first contact to start tracking your pipeline.
           </p>
           <a
             href="/contacts/new"
-            className="mt-4 inline-block rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-900"
+            className="mt-4 inline-block rounded-md bg-stone-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-stone-900"
           >
             Add first contact
           </a>
@@ -279,7 +279,7 @@ export function TodayDashboard({
             {today.length > 0 ? (
               <TaskList tasks={today} {...taskListProps} />
             ) : (
-              <p className="py-5 text-center text-sm text-slate-400">
+              <p className="py-5 text-center text-sm text-stone-400">
                 No tasks for today. Nice.
               </p>
             )}
@@ -322,7 +322,7 @@ export function TodayDashboard({
               />
             </div>
           ) : (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-stone-400">
               No activity yet. Log a call, email, or note from a contact&apos;s page.
             </p>
           )}

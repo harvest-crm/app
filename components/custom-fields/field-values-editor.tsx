@@ -35,7 +35,7 @@ function toArrayValue(val: unknown): string[] {
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+  "w-full rounded-md border border-stone-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
 
 // ── FieldInput ────────────────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ function FieldInput({
 }) {
   const label = (
     <div className="flex items-center gap-1 mb-1">
-      <span className="text-xs font-medium text-slate-600">{def.fieldLabel}</span>
+      <span className="text-xs font-medium text-stone-600">{def.fieldLabel}</span>
       {def.isRequired && <span className="text-red-500">*</span>}
       {isSaved && (
         <span className="ml-auto text-xs text-emerald-500">Saved</span>
@@ -80,9 +80,9 @@ function FieldInput({
                   onChange(next);
                   onSave(next);
                 }}
-                className="rounded border-slate-300"
+                className="rounded border-stone-300"
               />
-              <span className="text-sm text-slate-700">{opt}</span>
+              <span className="text-sm text-stone-700">{opt}</span>
             </label>
           ))}
         </div>
@@ -224,7 +224,7 @@ export function FieldValuesEditor({
       {groups.map((g) => (
         <div key={g.workspaceId}>
           {groups.length > 1 && (
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-400">
               {g.workspaceName}
             </p>
           )}

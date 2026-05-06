@@ -29,11 +29,11 @@ export default async function ImportContactsPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <Link href="/contacts" className="text-sm text-slate-400 hover:text-slate-600">
+        <Link href="/contacts" className="text-sm text-stone-400 hover:text-stone-600">
           ← Contacts
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900">Import Contacts</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="mt-2 text-2xl font-semibold text-stone-900">Import Contacts</h1>
+        <p className="mt-1 text-sm text-stone-500">
           Import your sphere, past clients, or lead lists from a CSV file.
         </p>
       </div>

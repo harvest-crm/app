@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <SearchProvider>
       <div className="flex h-screen overflow-hidden">
         <Sidebar workspaces={workspaces} />
-        <main className="flex-1 overflow-y-auto bg-slate-50">
+        <main className="flex-1 overflow-y-auto bg-stone-50">
           {children}
         </main>
       </div>

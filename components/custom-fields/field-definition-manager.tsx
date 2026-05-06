@@ -106,8 +106,8 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
             className={cn(
               "rounded-md px-4 py-1.5 text-sm font-medium capitalize transition-colors",
               tab === t
-                ? "bg-slate-800 text-white"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
+                ? "bg-stone-800 text-white"
+                : "text-stone-500 hover:bg-stone-50 hover:text-stone-700",
             )}
           >
             {t === "contact" ? "Contact Fields" : "Deal Fields"}
@@ -117,13 +117,13 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
 
       {/* Header row */}
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-stone-500">
           {defs.length === 0 ? "No fields yet." : `${defs.length} field${defs.length !== 1 ? "s" : ""}`}
         </p>
         <button
           type="button"
           onClick={() => { setEditingDef(null); setDialogMode("create"); }}
-          className="flex items-center gap-1.5 rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-900"
+          className="flex items-center gap-1.5 rounded-md bg-stone-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-stone-900"
         >
           <Plus className="h-4 w-4" />
           Add field
@@ -145,7 +145,7 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
                     type="button"
                     onClick={() => moveUp(idx)}
                     disabled={idx === 0}
-                    className="rounded p-0.5 text-slate-300 hover:text-slate-500 disabled:opacity-20"
+                    className="rounded p-0.5 text-stone-300 hover:text-stone-500 disabled:opacity-20"
                   >
                     <ChevronUp className="h-3.5 w-3.5" />
                   </button>
@@ -153,36 +153,36 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
                     type="button"
                     onClick={() => moveDown(idx)}
                     disabled={idx === defs.length - 1}
-                    className="rounded p-0.5 text-slate-300 hover:text-slate-500 disabled:opacity-20"
+                    className="rounded p-0.5 text-stone-300 hover:text-stone-500 disabled:opacity-20"
                   >
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                 </div>
 
                 {/* Icon */}
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100">
-                  <Icon className="h-4 w-4 text-slate-500" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-stone-100">
+                  <Icon className="h-4 w-4 text-stone-500" />
                 </div>
 
                 {/* Info */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-800">{def.fieldLabel}</span>
+                    <span className="text-sm font-medium text-stone-800">{def.fieldLabel}</span>
                     {def.isRequired && (
                       <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-600">
                         Required
                       </span>
                     )}
-                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">
+                    <span className="rounded bg-stone-100 px-1.5 py-0.5 text-xs text-stone-500">
                       {TYPE_LABEL[def.fieldType] ?? def.fieldType}
                     </span>
                   </div>
                   {def.options.length > 0 && (
-                    <p className="mt-0.5 truncate text-xs text-slate-400">
+                    <p className="mt-0.5 truncate text-xs text-stone-400">
                       {def.options.join(" · ")}
                     </p>
                   )}
-                  <p className="mt-0.5 text-xs text-slate-300">
+                  <p className="mt-0.5 text-xs text-stone-300">
                     <code>{def.fieldKey}</code>
                   </p>
                 </div>
@@ -190,7 +190,7 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
                 {/* Actions */}
                 {isDeleting ? (
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs text-slate-500">Delete?</span>
+                    <span className="text-xs text-stone-500">Delete?</span>
                     <button
                       onClick={() => handleDelete(def.id)}
                       className="text-xs font-semibold text-red-600 hover:text-red-700"
@@ -199,7 +199,7 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
                     </button>
                     <button
                       onClick={() => setDeletingId(null)}
-                      className="text-xs text-slate-400 hover:text-slate-600"
+                      className="text-xs text-stone-400 hover:text-stone-600"
                     >
                       No
                     </button>
@@ -209,14 +209,14 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
                     <button
                       type="button"
                       onClick={() => { setEditingDef(def); setDialogMode("edit"); }}
-                      className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                      className="rounded p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeletingId(def.id)}
-                      className="rounded p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600"
+                      className="rounded p-1.5 text-stone-400 hover:bg-red-100 hover:text-red-600"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -229,11 +229,11 @@ export function FieldDefinitionManager({ workspaceId, initialContactDefs, initia
       )}
 
       {defs.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-slate-200 p-10 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="rounded-xl border-2 border-dashed border-stone-200 p-10 text-center">
+          <p className="text-sm text-stone-500">
             No {tab === "contact" ? "contact" : "deal"} fields yet.
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-stone-400">
             Click &ldquo;Add field&rdquo; to create your first custom field.
           </p>
         </div>
