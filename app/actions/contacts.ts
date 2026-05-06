@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { formatPhone } from "@/lib/format";
 
 const contactSchema = z.object({
   firstName: z.string().min(1).max(100),
@@ -192,13 +193,6 @@ function fmtDateOnly(d: Date | null): string {
   return d ? d.toISOString().slice(0, 10) : "";
 }
 
-function fmtPhone(raw: string | null): string {
-  if (!raw) return "";
-  const d = raw.replace(/\D/g, "");
-  return d.length === 10
-    ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`
-    : raw;
-}
 
 const CSV_HEADERS = [
   "First Name", "Last Name", "Email", "Phone",
@@ -240,7 +234,7 @@ export async function exportContactsToCsv(filters: {
     const tags = c.contactTags.map((ct) => ct.tag.name).join(", ");
     const workspaces = c.contactWorkspaces.map((cw) => cw.workspace.name).join(", ");
     return [
-      c.firstName, c.lastName, c.email, fmtPhone(c.phone),
+      c.firstName, c.lastName, c.email, formatPhone(c.phone),
       c.source, c.sourceDetail, c.temperature,
       fmtDateOnly(c.birthday), fmtDateOnly(c.homeAnniversary),
       c.notes, tags, workspaces, c.createdAt.toISOString(),

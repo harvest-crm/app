@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { ExportCsvButton } from "@/components/export-csv-button";
+import { formatPhone } from "@/lib/format";
 
 const TEMPERATURE_COLORS = {
   hot: "bg-red-100 text-red-700",
@@ -159,7 +160,7 @@ export default async function ContactsPage({
                     )}
                   </td>
                   <td className="px-4 py-3 text-slate-600">{c.email ?? ""}</td>
-                  <td className="px-4 py-3 text-slate-600">{c.phone ?? ""}</td>
+                  <td className="px-4 py-3 text-slate-600">{formatPhone(c.phone)}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
