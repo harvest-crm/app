@@ -5,6 +5,8 @@ import { ContactForm } from "@/components/contact-form";
 import { ContactTagManager } from "@/components/contact-tag-manager";
 import { ContactWorkspaceManager } from "@/components/contact-workspace-manager";
 import { DeleteContactButton } from "@/components/delete-contact-button";
+import { ActivityFeed } from "@/components/activity-feed";
+import type { SerializedActivity } from "@/app/actions/activities";
 
 export default async function ContactDetailPage({
   params,
@@ -22,7 +24,7 @@ export default async function ContactDetailPage({
 
   if (!org) return null;
 
-  const [contact, allTags, allWorkspaces] = await Promise.all([
+  const [contact, allTags, allWorkspaces, rawActivities] = await Promise.all([
     db.contact.findFirst({
       where: { id, organizationId: org.id },
       include: {
@@ -38,9 +40,25 @@ export default async function ContactDetailPage({
       where: { organizationId: org.id },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
+    db.activity.findMany({
+      where: { contactId: id, organizationId: org.id },
+      orderBy: { occurredAt: "desc" },
+      take: 100,
+    }),
   ]);
 
   if (!contact) notFound();
+
+  const activities: SerializedActivity[] = rawActivities.map((a) => ({
+    id: a.id,
+    type: a.type,
+    body: a.body,
+    occurredAt: a.occurredAt.toISOString(),
+    createdAt: a.createdAt.toISOString(),
+    contactId: a.contactId,
+    dealId: a.dealId,
+    workspaceId: a.workspaceId,
+  }));
 
   return (
     <div className="p-8">
@@ -56,6 +74,14 @@ export default async function ContactDetailPage({
           <div className="rounded-lg border bg-white p-6">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Details</h2>
             <ContactForm contact={contact} />
+          </div>
+
+          <div className="rounded-lg border bg-white p-6">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Activity</h2>
+            <ActivityFeed
+              initialActivities={activities}
+              contactId={contact.id}
+            />
           </div>
         </div>
 
