@@ -12,9 +12,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { createDeal, updateDeal, deleteDeal } from "@/app/actions/deals";
 import { listActivitiesForDeal } from "@/app/actions/activities";
+import { listTasksForDeal } from "@/app/actions/tasks";
 import { ActivityFeed } from "@/components/activity-feed";
+import { TasksFeed } from "@/components/tasks-feed";
 import type { SerializedDeal, SerializedStage, ContactOption } from "./types";
 import type { SerializedActivity } from "@/app/actions/activities";
+import type { SerializedTask } from "@/app/actions/tasks";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -54,6 +57,20 @@ export function DealDialog({
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  // Tasks section
+  const [tasksOpen, setTasksOpen] = useState(false);
+  const [dealTasks, setDealTasks] = useState<SerializedTask[]>([]);
+  const [tasksLoaded, setTasksLoaded] = useState(false);
+
+  useEffect(() => {
+    if (tasksOpen && !tasksLoaded && deal) {
+      listTasksForDeal(deal.id).then((rows) => {
+        setDealTasks(rows);
+        setTasksLoaded(true);
+      });
+    }
+  }, [tasksOpen, tasksLoaded, deal]);
 
   // Activity section
   const [activityOpen, setActivityOpen] = useState(false);
@@ -276,6 +293,46 @@ export function DealDialog({
               </div>
             </div>
           </form>
+
+          {/* Tasks section — edit mode only */}
+          {mode === "edit" && deal && (
+            <div className="border-t">
+              <button
+                type="button"
+                onClick={() => setTasksOpen((o) => !o)}
+                className="flex w-full items-center gap-2 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 hover:text-slate-600"
+              >
+                <ChevronRight
+                  className={cn(
+                    "h-3.5 w-3.5 transition-transform",
+                    tasksOpen && "rotate-90",
+                  )}
+                />
+                Tasks
+                {tasksLoaded && dealTasks.length > 0 && (
+                  <span className="ml-auto font-normal normal-case text-slate-400">
+                    {dealTasks.filter((t) => !t.completedAt).length} open
+                  </span>
+                )}
+              </button>
+
+              {tasksOpen && (
+                <div className="px-5 pb-4">
+                  {tasksLoaded ? (
+                    <TasksFeed
+                      key={deal.id + "-tasks"}
+                      initialTasks={dealTasks}
+                      contactId={deal.contactId ?? undefined}
+                      dealId={deal.id}
+                      workspaceId={deal.workspaceId}
+                    />
+                  ) : (
+                    <p className="py-4 text-center text-xs text-slate-400">Loading…</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Activity section — edit mode only */}
           {mode === "edit" && deal && (
