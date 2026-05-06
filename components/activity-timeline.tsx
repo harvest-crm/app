@@ -49,10 +49,14 @@ function ActivityItem({
   activity,
   onUpdated,
   onDeleted,
+  readOnly,
+  contactInfo,
 }: {
   activity: SerializedActivity;
-  onUpdated: (a: SerializedActivity) => void;
-  onDeleted: (id: string) => void;
+  onUpdated?: (a: SerializedActivity) => void;
+  onDeleted?: (id: string) => void;
+  readOnly?: boolean;
+  contactInfo?: { name: string; id: string };
 }) {
   const [editing, setEditing] = useState(false);
   const [editBody, setEditBody] = useState(activity.body);
@@ -75,7 +79,7 @@ function ActivityItem({
       if ("error" in result) {
         toast.error(result.error);
       } else {
-        onUpdated(result.activity);
+        onUpdated?.(result.activity);
         setEditing(false);
         toast.success("Activity updated");
       }
@@ -88,7 +92,7 @@ function ActivityItem({
       if ("error" in result) {
         toast.error(result.error);
       } else {
-        onDeleted(activity.id);
+        onDeleted?.(activity.id);
         toast.success("Activity deleted");
       }
     });
@@ -145,6 +149,17 @@ function ActivityItem({
           <p className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700">{activity.body}</p>
         )}
 
+        {contactInfo && (
+          <a
+            href={`/contacts/${contactInfo.id}`}
+            className="mt-0.5 block text-xs text-blue-600 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {contactInfo.name}
+          </a>
+        )}
+
         {/* Inline delete confirm */}
         {!editing && confirmDelete && (
           <div className="mt-1.5 flex items-center gap-2">
@@ -166,8 +181,8 @@ function ActivityItem({
         )}
       </div>
 
-      {/* Hover actions */}
-      {!editing && !confirmDelete && (
+      {/* Hover actions — hidden in readOnly mode */}
+      {!readOnly && !editing && !confirmDelete && (
         <div className="flex shrink-0 items-start gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             onClick={() => setEditing(true)}
@@ -195,10 +210,14 @@ export function ActivityTimeline({
   activities,
   onUpdated,
   onDeleted,
+  readOnly,
+  contacts,
 }: {
   activities: SerializedActivity[];
-  onUpdated: (a: SerializedActivity) => void;
-  onDeleted: (id: string) => void;
+  onUpdated?: (a: SerializedActivity) => void;
+  onDeleted?: (id: string) => void;
+  readOnly?: boolean;
+  contacts?: Record<string, { name: string; id: string }>;
 }) {
   if (activities.length === 0) {
     return (
@@ -214,6 +233,8 @@ export function ActivityTimeline({
         <ActivityItem
           key={a.id}
           activity={a}
+          readOnly={readOnly}
+          contactInfo={a.contactId ? contacts?.[a.contactId] : undefined}
           onUpdated={onUpdated}
           onDeleted={onDeleted}
         />
