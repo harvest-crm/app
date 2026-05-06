@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { Sidebar } from "@/components/sidebar";
+import { SearchProvider, SearchModal } from "@/components/search-modal";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { orgId: clerkOrgId } = await auth();
@@ -22,11 +23,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar workspaces={workspaces} />
-      <main className="flex-1 overflow-y-auto bg-slate-50">
-        {children}
-      </main>
-    </div>
+    <SearchProvider>
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar workspaces={workspaces} />
+        <main className="flex-1 overflow-y-auto bg-slate-50">
+          {children}
+        </main>
+      </div>
+      <SearchModal />
+    </SearchProvider>
   );
 }

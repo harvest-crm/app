@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { Home, Users, Tag, Settings, Building2 } from "lucide-react";
+import { Home, Users, Tag, Settings, Building2, Search } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { useSearch } from "@/components/search-modal";
 import { cn } from "@/lib/utils";
 import type { Workspace } from "@/app/generated/prisma/client";
 
@@ -19,13 +20,27 @@ type SidebarProps = {
 };
 
 export function Sidebar({ workspaces }: SidebarProps) {
-  const pathname = usePathname();
+  const pathname  = usePathname();
+  const { setOpen } = useSearch();
 
   return (
     <aside className="flex h-screen w-56 flex-col border-r bg-slate-900 text-slate-100">
       <div className="flex items-center gap-2.5 border-b border-slate-800 px-4 py-3.5">
         <Logo size={20} />
         <span className="text-sm font-semibold tracking-tight text-slate-100">Harvest CRM</span>
+      </div>
+
+      {/* Search trigger */}
+      <div className="px-2 py-2">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex w-full items-center gap-2 rounded-md border border-slate-700 bg-slate-800/60 px-2.5 py-1.5 text-xs text-slate-500 transition-colors hover:border-slate-600 hover:text-slate-400"
+        >
+          <Search className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1 text-left">Search…</span>
+          <kbd className="text-slate-600">⌘K</kbd>
+        </button>
       </div>
 
       <div className="flex h-14 items-center border-b border-slate-700 px-3">
