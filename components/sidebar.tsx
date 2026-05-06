@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { Home, Users, Tag, Settings, Building2, Wheat } from "lucide-react";
+import { Home, Users, Tag, Settings, Building2 } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import type { Workspace } from "@/app/generated/prisma/client";
 
@@ -23,7 +24,7 @@ export function Sidebar({ workspaces }: SidebarProps) {
   return (
     <aside className="flex h-screen w-56 flex-col border-r bg-slate-900 text-slate-100">
       <div className="flex items-center gap-2.5 border-b border-slate-800 px-4 py-3.5">
-        <Wheat className="h-5 w-5 shrink-0 text-amber-400" />
+        <Logo size={20} />
         <span className="text-sm font-semibold tracking-tight text-slate-100">Harvest CRM</span>
       </div>
 
