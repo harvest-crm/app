@@ -122,3 +122,17 @@ export async function getWorkspaces() {
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 }
+
+export async function regenerateWebhookToken(
+  workspaceId: string,
+): Promise<{ token: string } | { error: string }> {
+  const { organizationId } = await requireOrg();
+
+  const ws = await db.workspace.findFirst({ where: { id: workspaceId, organizationId } });
+  if (!ws) return { error: "Workspace not found" };
+
+  const token = randomBytes(32).toString("hex");
+  await db.workspace.update({ where: { id: workspaceId }, data: { webhookToken: token } });
+
+  return { token };
+}

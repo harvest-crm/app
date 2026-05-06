@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { ExportCsvButton } from "@/components/export-csv-button";
 import { formatPhone } from "@/lib/format";
 
@@ -109,6 +109,12 @@ export default async function ContactsPage({
         <h1 className="text-2xl font-semibold text-slate-900">Contacts</h1>
         <div className="flex items-center gap-2">
           <ExportCsvButton filters={{ q: params.q, workspace: params.workspace }} />
+          <Link href="/contacts/import">
+            <Button variant="outline" size="sm">
+              <Upload className="mr-1.5 h-4 w-4" />
+              Import CSV
+            </Button>
+          </Link>
           <Link href="/contacts/new">
             <Button size="sm">
               <Plus className="mr-1.5 h-4 w-4" />
