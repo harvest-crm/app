@@ -178,7 +178,7 @@ export function ContactForm({ contact, workspaces, defaultWorkspaceId }: Props) 
         <Select
           value={sourceValue || undefined}
           onValueChange={(v) => {
-            setValue("source", v);
+            setValue("source", v ?? "");
             if (v !== "Other") setValue("sourceDetail", "");
           }}
         >
