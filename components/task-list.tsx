@@ -1,11 +1,33 @@
 "use client";
 
-import { useState, useTransition, useRef, useEffect } from "react";
-import { Circle, CheckCircle2, Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import {
+  Circle, CheckCircle2, Trash2, Bell,
+  Phone, Mail, Calendar, RotateCw, FileText, MoreHorizontal,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { updateTask, deleteTask } from "@/app/actions/tasks";
+import { deleteTask } from "@/app/actions/tasks";
 import type { SerializedTask } from "@/app/actions/tasks";
+
+// ── Config ────────────────────────────────────────────────────────────────────
+
+const PRIORITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
+const PRIORITY_DOT: Record<string, string> = {
+  high:   "bg-red-400",
+  medium: "bg-blue-400",
+  low:    "bg-slate-300",
+};
+
+const TASK_TYPE_ICON: Record<string, React.ElementType> = {
+  call:            Phone,
+  email:           Mail,
+  meeting_prep:    Calendar,
+  follow_up:       RotateCw,
+  document_review: FileText,
+  other:           MoreHorizontal,
+};
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
@@ -13,15 +35,25 @@ function formatDue(iso: string): string {
   const d = new Date(iso);
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dueStart  = new Date(d.getFullYear(),   d.getMonth(),   d.getDate());
+  const dueStart   = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
   const diff = Math.round((dueStart.getTime() - todayStart.getTime()) / 86_400_000);
 
-  if (diff === 0)  return "Today";
-  if (diff === 1)  return "Tomorrow";
-  if (diff === -1) return "Yesterday";
-  if (diff > 1  && diff < 7)  return `in ${diff} days`;
-  if (diff < -1 && diff > -7) return `${Math.abs(diff)} days ago`;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  let day: string;
+  if      (diff === 0)           day = "Today";
+  else if (diff === 1)           day = "Tomorrow";
+  else if (diff === -1)          day = "Yesterday";
+  else if (diff > 1  && diff < 7)  day = `in ${diff} days`;
+  else if (diff < -1 && diff > -7) day = `${Math.abs(diff)} days ago`;
+  else day = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  // Show time if not the noon-UTC default
+  const h = d.getUTCHours(), m = d.getUTCMinutes(), s = d.getUTCSeconds();
+  if (!(h === 12 && m === 0 && s === 0)) {
+    const ampm = h >= 12 ? "PM" : "AM";
+    const h12  = h % 12 || 12;
+    return `${day} at ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+  }
+  return day;
 }
 
 function isOverdue(task: SerializedTask): boolean {
@@ -34,6 +66,9 @@ function sortTasks(tasks: SerializedTask[]) {
   const open = tasks
     .filter((t) => !t.completedAt)
     .sort((a, b) => {
+      const pa = PRIORITY_ORDER[a.priority] ?? 1;
+      const pb = PRIORITY_ORDER[b.priority] ?? 1;
+      if (pa !== pb) return pa - pb;
       if (!a.dueAt && !b.dueAt) return 0;
       if (!a.dueAt) return 1;
       if (!b.dueAt) return -1;
@@ -54,60 +89,20 @@ function sortTasks(tasks: SerializedTask[]) {
 function TaskRow({
   task,
   onToggle,
-  onUpdated,
+  onOpenEdit,
   onDeleted,
 }: {
   task: SerializedTask;
   onToggle: () => void;
-  onUpdated: (t: SerializedTask) => void;
+  onOpenEdit: () => void;
   onDeleted: (id: string) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(task.title);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [pending, startTransition] = useTransition();
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const overdue = isOverdue(task);
+  const overdue   = isOverdue(task);
   const completed = !!task.completedAt;
-
-  // Focus input when entering edit mode
-  useEffect(() => {
-    if (editing) inputRef.current?.focus();
-  }, [editing]);
-
-  function startEditing() {
-    if (completed) return; // don't edit completed tasks inline
-    setEditTitle(task.title);
-    setEditing(true);
-  }
-
-  function cancelEdit() {
-    setEditing(false);
-    setEditTitle(task.title);
-  }
-
-  function saveEdit() {
-    const trimmed = editTitle.trim();
-    if (!trimmed || trimmed === task.title) {
-      cancelEdit();
-      return;
-    }
-    startTransition(async () => {
-      const fd = new FormData();
-      fd.set("title", trimmed);
-      if (task.dueAt) fd.set("dueAt", task.dueAt.split("T")[0]);
-      const result = await updateTask(task.id, fd);
-      if ("error" in result) {
-        toast.error(result.error);
-        cancelEdit();
-      } else {
-        onUpdated(result.task);
-        setEditing(false);
-        toast.success("Task updated");
-      }
-    });
-  }
+  const TypeIcon  = task.taskType ? TASK_TYPE_ICON[task.taskType] : null;
 
   function handleDelete() {
     startTransition(async () => {
@@ -124,71 +119,78 @@ function TaskRow({
   return (
     <div
       className={cn(
-        "group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors",
-        overdue && "bg-red-50/60",
+        "group flex items-start gap-2 rounded-lg px-2 py-2 transition-colors",
+        overdue && !completed && "bg-red-50/60",
       )}
     >
+      {/* Priority dot */}
+      <div
+        className={cn(
+          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+          completed ? "bg-slate-200" : (PRIORITY_DOT[task.priority] ?? "bg-slate-200"),
+        )}
+        title={`${task.priority} priority`}
+      />
+
       {/* Checkbox */}
       <button
         type="button"
         onClick={onToggle}
         className={cn(
           "mt-0.5 shrink-0 transition-colors",
-          completed
-            ? "text-slate-300 hover:text-slate-400"
-            : "text-slate-300 hover:text-blue-500",
+          completed ? "text-slate-300" : "text-slate-300 hover:text-blue-500",
         )}
       >
         {completed ? (
-          <CheckCircle2 className="h-4 w-4 text-slate-400" />
+          <CheckCircle2 className="h-4 w-4 text-slate-300" />
         ) : (
           <Circle className="h-4 w-4" />
         )}
       </button>
 
-      {/* Title + due date */}
+      {/* Content */}
       <div className="min-w-0 flex-1">
-        {editing ? (
-          <input
-            ref={inputRef}
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onBlur={saveEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") { e.preventDefault(); saveEdit(); }
-              if (e.key === "Escape") cancelEdit();
-            }}
-            disabled={pending}
-            className="w-full rounded border border-blue-300 bg-white px-1.5 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
-          />
-        ) : (
+        <div className="flex items-center gap-1.5">
+          {TypeIcon && (
+            <TypeIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+          )}
           <span
-            onClick={startEditing}
+            onClick={onOpenEdit}
             className={cn(
-              "block cursor-pointer text-sm",
-              completed
-                ? "text-slate-400 line-through"
-                : "text-slate-800 hover:text-slate-600",
+              "cursor-pointer text-sm leading-snug",
+              completed ? "text-slate-400 line-through" : "text-slate-800 hover:text-blue-600",
             )}
           >
             {task.title}
           </span>
+        </div>
+
+        {task.description && (
+          <p className="mt-0.5 truncate text-xs text-slate-400">
+            {task.description.slice(0, 80)}
+          </p>
         )}
 
-        {task.dueAt && !editing && (
-          <span
-            className={cn(
-              "text-xs",
-              overdue ? "font-medium text-red-500" : "text-slate-400",
+        {task.dueAt && (
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <span
+              className={cn(
+                "text-xs",
+                overdue && !completed ? "font-medium text-red-500" : "text-slate-400",
+              )}
+            >
+              {formatDue(task.dueAt)}
+            </span>
+            {task.reminderAt && (
+              <span title="Reminder set">
+                <Bell className="h-3 w-3 text-slate-400" />
+              </span>
             )}
-          >
-            {formatDue(task.dueAt)}
-          </span>
+          </div>
         )}
 
-        {/* Inline delete confirm */}
         {confirmDelete && (
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1.5 flex items-center gap-2">
             <span className="text-xs text-slate-500">Delete?</span>
             <button
               onClick={handleDelete}
@@ -207,8 +209,8 @@ function TaskRow({
         )}
       </div>
 
-      {/* Hover actions */}
-      {!editing && !confirmDelete && (
+      {/* Hover trash */}
+      {!confirmDelete && (
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
@@ -227,12 +229,12 @@ function TaskRow({
 export function TaskList({
   tasks,
   onToggle,
-  onUpdated,
+  onOpenEdit,
   onDeleted,
 }: {
   tasks: SerializedTask[];
   onToggle: (task: SerializedTask) => void;
-  onUpdated: (task: SerializedTask) => void;
+  onOpenEdit: (task: SerializedTask) => void;
   onDeleted: (id: string) => void;
 }) {
   if (tasks.length === 0) {
@@ -248,7 +250,7 @@ export function TaskList({
           key={t.id}
           task={t}
           onToggle={() => onToggle(t)}
-          onUpdated={onUpdated}
+          onOpenEdit={() => onOpenEdit(t)}
           onDeleted={onDeleted}
         />
       ))}
@@ -267,7 +269,7 @@ export function TaskList({
               key={t.id}
               task={t}
               onToggle={() => onToggle(t)}
-              onUpdated={onUpdated}
+              onOpenEdit={() => onOpenEdit(t)}
               onDeleted={onDeleted}
             />
           ))}

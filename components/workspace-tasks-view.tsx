@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { QuickCreateTask } from "@/components/quick-create-task";
 import { TaskList } from "@/components/task-list";
+import { TaskDialog } from "@/components/task-dialog";
 import { completeTask, reopenTask } from "@/app/actions/tasks";
 import type { SerializedTask } from "@/app/actions/tasks";
 
@@ -19,7 +20,9 @@ type Props = {
 export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
   const [tasks, setTasks] = useState<SerializedTask[]>(initialTasks);
   const [filter, setFilter] = useState<Filter>("open");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [dialogMode, setDialogMode] = useState<"create" | "edit" | null>(null);
+  const [editingTask, setEditingTask] = useState<SerializedTask | null>(null);
+  const [dialogTitle, setDialogTitle] = useState("");
 
   const filteredTasks = useMemo(() => {
     if (filter === "open") return tasks.filter((t) => !t.completedAt);
@@ -46,9 +49,9 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
   }
 
   const FILTERS: { key: Filter; label: string }[] = [
-    { key: "open", label: "Open" },
+    { key: "open",      label: "Open" },
     { key: "completed", label: "Completed" },
-    { key: "all", label: "All" },
+    { key: "all",       label: "All" },
   ];
 
   return (
@@ -56,14 +59,9 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between border-b bg-white px-6 py-4">
         <div className="flex items-center gap-3">
-          <span
-            className="h-3 w-3 shrink-0 rounded-full"
-            style={{ backgroundColor: workspace.color }}
-          />
+          <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: workspace.color }} />
           <div>
-            <h1 className="text-lg font-semibold text-slate-900">
-              {workspace.name} · Tasks
-            </h1>
+            <h1 className="text-lg font-semibold text-slate-900">{workspace.name} · Tasks</h1>
             <p className="text-xs text-slate-400">
               {openCount} open task{openCount !== 1 ? "s" : ""}
             </p>
@@ -71,7 +69,7 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
         </div>
         <button
           type="button"
-          onClick={() => inputRef.current?.focus()}
+          onClick={() => { setEditingTask(null); setDialogTitle(""); setDialogMode("create"); }}
           className="flex items-center gap-1.5 rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-slate-900"
         >
           <Plus className="h-4 w-4" />
@@ -84,14 +82,18 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
         {/* Quick create */}
         <div className="mb-6 rounded-lg border bg-white p-4">
           <QuickCreateTask
-            ref={inputRef}
             workspaceId={workspace.id}
             onCreated={(t) => setTasks((prev) => [t, ...prev])}
+            onOpenAdvanced={(title) => {
+              setDialogTitle(title);
+              setEditingTask(null);
+              setDialogMode("create");
+            }}
           />
         </div>
 
         {/* Filter tabs */}
-        <div className="mb-4 flex gap-1 rounded-lg border bg-white p-1 w-fit">
+        <div className="mb-4 flex w-fit gap-1 rounded-lg border bg-white p-1">
           {FILTERS.map(({ key, label }) => (
             <button
               key={key}
@@ -119,13 +121,31 @@ export function WorkspaceTasksView({ workspace, initialTasks }: Props) {
           <TaskList
             tasks={filteredTasks}
             onToggle={handleToggle}
-            onUpdated={(updated) =>
-              setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
-            }
+            onOpenEdit={(task) => { setEditingTask(task); setDialogMode("edit"); }}
             onDeleted={(id) => setTasks((prev) => prev.filter((t) => t.id !== id))}
           />
         </div>
       </div>
+
+      {/* Dialog */}
+      {dialogMode && (
+        <TaskDialog
+          mode={dialogMode}
+          task={dialogMode === "edit" ? (editingTask ?? undefined) : undefined}
+          initialTitle={dialogMode === "create" ? dialogTitle : undefined}
+          workspaceId={workspace.id}
+          onCreated={(t) => { setTasks((prev) => [t, ...prev]); setDialogMode(null); }}
+          onUpdated={(t) => {
+            setTasks((prev) => prev.map((x) => (x.id === t.id ? t : x)));
+            setDialogMode(null);
+          }}
+          onDeleted={(id) => {
+            setTasks((prev) => prev.filter((t) => t.id !== id));
+            setDialogMode(null);
+          }}
+          onClose={() => setDialogMode(null)}
+        />
+      )}
     </div>
   );
 }

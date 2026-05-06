@@ -2,6 +2,7 @@
 
 import { useState, useTransition, forwardRef } from "react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { createTask } from "@/app/actions/tasks";
 import type { SerializedTask } from "@/app/actions/tasks";
 
@@ -10,6 +11,7 @@ type Props = {
   dealId?: string;
   workspaceId?: string;
   onCreated: (task: SerializedTask) => void;
+  onOpenAdvanced: (title: string, dueDate: string) => void;
 };
 
 function toDateStr(d: Date): string {
@@ -27,9 +29,12 @@ function addDays(n: number): string {
 }
 
 export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
-  function QuickCreateTask({ contactId, dealId, workspaceId, onCreated }, ref) {
+  function QuickCreateTask(
+    { contactId, dealId, workspaceId, onCreated, onOpenAdvanced },
+    ref,
+  ) {
     const [title, setTitle] = useState("");
-    const [dueAt, setDueAt] = useState("");
+    const [dueDate, setDueDate] = useState("");
     const [pending, startTransition] = useTransition();
 
     function handleSubmit(e: React.FormEvent) {
@@ -39,7 +44,7 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
       startTransition(async () => {
         const fd = new FormData();
         fd.set("title", title.trim());
-        if (dueAt) fd.set("dueAt", dueAt);
+        if (dueDate) fd.set("dueDate", dueDate);
         if (contactId) fd.set("contactId", contactId);
         if (dealId) fd.set("dealId", dealId);
         if (workspaceId) fd.set("workspaceId", workspaceId);
@@ -50,7 +55,7 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
         } else {
           onCreated(result.task);
           setTitle("");
-          setDueAt("");
+          setDueDate("");
           toast.success("Task added");
         }
       });
@@ -58,12 +63,10 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
 
     const quickBtnClass =
       "rounded px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors";
-    const quickBtnActive =
-      "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700";
+    const quickBtnActive = "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700";
 
     return (
       <form onSubmit={handleSubmit} className="space-y-2">
-        {/* Title input */}
         <div className="flex gap-2">
           <input
             ref={ref}
@@ -81,38 +84,41 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
           >
             {pending ? "Adding…" : "Add"}
           </button>
-        </div>
-
-        {/* Date row */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {/* Quick-set buttons */}
           <button
             type="button"
-            onClick={() => setDueAt(dueAt === addDays(0) ? "" : addDays(0))}
-            className={cn(quickBtnClass, dueAt === addDays(0) && quickBtnActive)}
+            onClick={() => onOpenAdvanced(title, dueDate)}
+            className="rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+          >
+            Advanced…
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setDueDate(dueDate === addDays(0) ? "" : addDays(0))}
+            className={cn(quickBtnClass, dueDate === addDays(0) && quickBtnActive)}
           >
             Today
           </button>
           <button
             type="button"
-            onClick={() => setDueAt(dueAt === addDays(1) ? "" : addDays(1))}
-            className={cn(quickBtnClass, dueAt === addDays(1) && quickBtnActive)}
+            onClick={() => setDueDate(dueDate === addDays(1) ? "" : addDays(1))}
+            className={cn(quickBtnClass, dueDate === addDays(1) && quickBtnActive)}
           >
             Tomorrow
           </button>
           <button
             type="button"
-            onClick={() => setDueAt(dueAt === addDays(7) ? "" : addDays(7))}
-            className={cn(quickBtnClass, dueAt === addDays(7) && quickBtnActive)}
+            onClick={() => setDueDate(dueDate === addDays(7) ? "" : addDays(7))}
+            className={cn(quickBtnClass, dueDate === addDays(7) && quickBtnActive)}
           >
             Next Week
           </button>
-
-          {/* Date input */}
           <input
             type="date"
-            value={dueAt}
-            onChange={(e) => setDueAt(e.target.value)}
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
             className="rounded border border-slate-200 px-2 py-1 text-xs text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -120,8 +126,3 @@ export const QuickCreateTask = forwardRef<HTMLInputElement, Props>(
     );
   },
 );
-
-// Need cn helper — inline since it's just used here
-function cn(...classes: (string | boolean | undefined)[]): string {
-  return classes.filter(Boolean).join(" ");
-}

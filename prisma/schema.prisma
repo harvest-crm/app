@@ -169,7 +169,11 @@ model Task {
   dealId                String?
   deal                  Deal?        @relation(fields: [dealId], references: [id])
   title                 String
+  description           String?      @db.Text
+  priority              String       @default("medium")
+  taskType              String?
   dueAt                 DateTime?
+  reminderAt            DateTime?
   completedAt           DateTime?
   assignedToClerkUserId String?
   createdAt             DateTime     @default(now())

@@ -34,7 +34,11 @@ export default async function TasksPage({
   const tasks: SerializedTask[] = rawTasks.map((t) => ({
     id: t.id,
     title: t.title,
+    description: t.description,
+    priority: t.priority,
+    taskType: t.taskType,
     dueAt: t.dueAt?.toISOString() ?? null,
+    reminderAt: t.reminderAt?.toISOString() ?? null,
     completedAt: t.completedAt?.toISOString() ?? null,
     contactId: t.contactId,
     dealId: t.dealId,
