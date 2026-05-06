@@ -27,7 +27,7 @@ export function Sidebar({ workspaces }: SidebarProps) {
     <aside className="flex h-screen w-56 flex-col border-r bg-slate-900 text-slate-100">
       <div className="flex items-center gap-2.5 border-b border-slate-800 px-4 py-3.5">
         <Logo size={20} />
-        <span className="text-sm font-semibold tracking-tight text-slate-100">Harvest CRM</span>
+        <span className="text-sm font-semibold tracking-tight text-slate-100">Covenant CRM</span>
       </div>
 
       {/* Search trigger */}

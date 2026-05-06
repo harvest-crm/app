@@ -4,9 +4,11 @@ type Props = {
 };
 
 /**
- * Harvest CRM logomark — geometric H with an amber rising crossbar.
- * The crossbar's upward angle (left→right) is the growth element.
- * Navy #1E293B / amber #F59E0B only. No text — pair with "Harvest CRM" typography.
+ * Covenant CRM logomark — two concentric arcs forming a C.
+ * Outer arc: dark navy #1E293B (blends with dark sidebar bg, visible on light).
+ * Inner arc: warm gold #D4A574 (the covenant accent, visible on all backgrounds).
+ * The layered C suggests two parties bound together.
+ * No text — pair with "Covenant CRM" typography.
  */
 export function Logo({ size = 24, className }: Props) {
   return (
@@ -19,12 +21,20 @@ export function Logo({ size = 24, className }: Props) {
       className={className}
       aria-hidden="true"
     >
-      {/* Left vertical stroke */}
-      <rect x="2" y="2" width="8" height="28" rx="1" fill="#1E293B" />
-      {/* Right vertical stroke */}
-      <rect x="22" y="2" width="8" height="28" rx="1" fill="#1E293B" />
-      {/* Crossbar — amber parallelogram rising left→right, hinting at growth */}
-      <polygon points="10,18 10,14 22,10 22,14" fill="#F59E0B" />
+      {/* Outer arc — navy, C opening to the right, ±55° gap */}
+      <path
+        d="M 22.9 25.8 A 12 12 0 1 1 22.9 6.2"
+        stroke="#1E293B"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      {/* Inner arc — warm gold, same opening angle, smaller radius */}
+      <path
+        d="M 20.3 22.1 A 7.5 7.5 0 1 1 20.3 9.9"
+        stroke="#D4A574"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
