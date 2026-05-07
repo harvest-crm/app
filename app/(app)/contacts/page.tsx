@@ -8,14 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Upload } from "lucide-react";
 import { ExportCsvButton } from "@/components/export-csv-button";
 import { formatPhone } from "@/lib/format";
+import { ContactsTable } from "@/components/contacts/contacts-table";
+import type { ContactRow } from "@/components/contacts/contacts-table";
 
 export const metadata: Metadata = { title: "Contacts" };
-
-const TEMPERATURE_COLORS = {
-  hot: "bg-red-100 text-red-700",
-  warm: "bg-amber-100 text-amber-700",
-  cold: "bg-[#E2F0EE] text-[#1F8A8A]",
-} as const;
 
 export default async function ContactsPage({
   searchParams,
@@ -40,40 +36,42 @@ export default async function ContactsPage({
     );
   }
 
-  const workspaces = await db.workspace.findMany({
-    where: { organizationId: org.id },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: { id: true, name: true, slug: true },
-  });
+  const [workspaces, contacts, allTags] = await Promise.all([
+    db.workspace.findMany({
+      where: { organizationId: org.id },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { id: true, name: true, slug: true, color: true },
+    }),
+    db.contact.findMany({
+      where: {
+        organizationId: org.id,
+        ...(params.q
+          ? {
+              OR: [
+                { firstName: { contains: params.q, mode: "insensitive" } },
+                { lastName: { contains: params.q, mode: "insensitive" } },
+                { email: { contains: params.q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+        ...(params.workspace
+          ? { contactWorkspaces: { some: { workspace: { slug: params.workspace } } } }
+          : {}),
+      },
+      include: {
+        contactTags: { include: { tag: true } },
+        contactWorkspaces: { include: { workspace: { select: { name: true, slug: true } } } },
+      },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    }),
+    db.tag.findMany({
+      where: { organizationId: org.id },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, color: true },
+    }),
+  ]);
 
-  const contacts = await db.contact.findMany({
-    where: {
-      organizationId: org.id,
-      ...(params.q
-        ? {
-            OR: [
-              { firstName: { contains: params.q, mode: "insensitive" } },
-              { lastName: { contains: params.q, mode: "insensitive" } },
-              { email: { contains: params.q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      ...(params.workspace
-        ? {
-            contactWorkspaces: {
-              some: { workspace: { slug: params.workspace } },
-            },
-          }
-        : {}),
-    },
-    include: {
-      contactTags: { include: { tag: true } },
-      contactWorkspaces: { include: { workspace: { select: { name: true, slug: true } } } },
-    },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-  });
-
-  // Price range special render — only fetch if definitions exist in this org
+  // Price range special render
   const priceRangeDefs = await db.customFieldDefinition.findMany({
     where: { organizationId: org.id, fieldKey: { in: ["price_range_min", "price_range_max"] }, entityType: "contact" },
     select: { id: true, fieldKey: true },
@@ -87,7 +85,6 @@ export default async function ContactsPage({
         })
       : [];
 
-  // Build lookup: contactId -> { min, max }
   const priceByContact = new Map<string, { min?: number; max?: number }>();
   for (const v of priceValues) {
     const key = v.definitionId === priceDefMap.get("price_range_min") ? "min" : "max";
@@ -96,8 +93,8 @@ export default async function ContactsPage({
     priceByContact.set(v.entityId, entry);
   }
 
-  function fmtPriceRange(contactId: string): string | null {
-    const p = priceByContact.get(contactId);
+  function fmtPriceRange(id: string): string | null {
+    const p = priceByContact.get(id);
     if (!p || (!p.min && !p.max)) return null;
     const fmt = (n: number) =>
       n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${Math.round(n / 1_000)}k` : `$${n}`;
@@ -105,6 +102,26 @@ export default async function ContactsPage({
     if (p.min) return `${fmt(p.min)}+`;
     return `up to ${fmt(p.max!)}`;
   }
+
+  // Serialize contacts for the client component
+  const rows: ContactRow[] = contacts.map((c) => ({
+    id:         c.id,
+    firstName:  c.firstName,
+    lastName:   c.lastName,
+    email:      c.email,
+    phone:      formatPhone(c.phone),
+    temperature: c.temperature,
+    priceRange: fmtPriceRange(c.id),
+    workspaces: c.contactWorkspaces.map((cw) => ({
+      name: cw.workspace.name,
+      slug: cw.workspace.slug,
+    })),
+    tags: c.contactTags.map((ct) => ({
+      id:    ct.tag.id,
+      name:  ct.tag.name,
+      color: ct.tag.color,
+    })),
+  }));
 
   return (
     <div className="p-8">
@@ -129,31 +146,15 @@ export default async function ContactsPage({
 
       <div className="mb-4 flex gap-3">
         <form className="flex-1">
-          <Input
-            name="q"
-            placeholder="Search contacts..."
-            defaultValue={params.q ?? ""}
-            className="max-w-sm"
-          />
-          {params.workspace && (
-            <input type="hidden" name="workspace" value={params.workspace} />
-          )}
+          <Input name="q" placeholder="Search contacts..." defaultValue={params.q ?? ""} className="max-w-sm" />
+          {params.workspace && <input type="hidden" name="workspace" value={params.workspace} />}
         </form>
         {workspaces.length > 0 && (
           <div className="flex items-center gap-2">
             {workspaces.map((ws) => (
-              <Link
-                key={ws.id}
-                href={
-                  params.workspace === ws.slug
-                    ? "/contacts"
-                    : `/contacts?workspace=${ws.slug}${params.q ? `&q=${params.q}` : ""}`
-                }
-              >
-                <Badge
-                  variant={params.workspace === ws.slug ? "default" : "outline"}
-                  className="cursor-pointer"
-                >
+              <Link key={ws.id}
+                href={params.workspace === ws.slug ? "/contacts" : `/contacts?workspace=${ws.slug}${params.q ? `&q=${params.q}` : ""}`}>
+                <Badge variant={params.workspace === ws.slug ? "default" : "outline"} className="cursor-pointer">
                   {ws.name}
                 </Badge>
               </Link>
@@ -162,79 +163,11 @@ export default async function ContactsPage({
         )}
       </div>
 
-      {contacts.length === 0 ? (
-        <div className="mt-12 text-center">
-          <p className="text-[#3D5775]">No contacts found.</p>
-          <Link href="/contacts/new" className="mt-2 inline-block">
-            <Button variant="outline" size="sm">Add your first contact</Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-lg border bg-white">
-          <table className="w-full text-sm">
-            <thead className="border-b bg-[#F5EFE0]">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Name</th>
-                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Email</th>
-                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Phone</th>
-                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Temperature</th>
-                <th className="px-4 py-3 text-left font-medium text-[#3D5775]">Tags</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {contacts.map((c) => (
-                <tr key={c.id} className="hover:bg-[#E2F0EE]">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/contacts/${c.id}`}
-                      className="font-medium text-[#0F2540] hover:text-[#1F8A8A]"
-                    >
-                      {c.firstName} {c.lastName}
-                    </Link>
-                    {fmtPriceRange(c.id) && (
-                      <div className="mt-0.5 text-xs text-[#3D5775]">{fmtPriceRange(c.id)}</div>
-                    )}
-                    {c.contactWorkspaces.length > 0 && (
-                      <div className="mt-0.5 flex gap-1">
-                        {c.contactWorkspaces.map((cw) => (
-                          <span key={cw.workspace.slug} className="text-xs text-[#3D5775]">
-                            {cw.workspace.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-[#3D5775]">{c.email ?? ""}</td>
-                  <td className="px-4 py-3 text-[#3D5775]">{formatPhone(c.phone)}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-                        TEMPERATURE_COLORS[c.temperature as keyof typeof TEMPERATURE_COLORS] ??
-                        "bg-[#E2F0EE] text-[#3D5775]"
-                      }`}
-                    >
-                      {c.temperature}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {c.contactTags.map((ct) => (
-                        <span
-                          key={ct.tagId}
-                          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                          style={{ backgroundColor: ct.tag.color }}
-                        >
-                          {ct.tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ContactsTable
+        contacts={rows}
+        allTags={allTags}
+        allWorkspaces={workspaces.map((w) => ({ id: w.id, name: w.name, color: w.color }))}
+      />
     </div>
   );
 }
