@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { Home, Users, Tag, Settings, Building2, Search, ListChecks } from "lucide-react";
+import { Home, Users, Tag, Settings, Building2, Search, ListChecks, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { useSearch } from "@/components/search-modal";
@@ -21,9 +21,10 @@ const C = {
 } as const;
 
 const NAV_ITEMS = [
-  { href: "/today",    label: "Today",    icon: Home },
-  { href: "/contacts", label: "Contacts", icon: Users },
-  { href: "/tags",     label: "Tags",     icon: Tag },
+  { href: "/today",    label: "Today",    icon: Home        },
+  { href: "/contacts", label: "Contacts", icon: Users       },
+  { href: "/tasks",    label: "Tasks",    icon: CheckSquare },
+  { href: "/tags",     label: "Tags",     icon: Tag         },
 ];
 
 type SidebarProps = {

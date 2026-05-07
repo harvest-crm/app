@@ -58,6 +58,7 @@ model Workspace {
   documents              Document[]
   automations            StageAutomation[]
   taskTemplates          TaskTemplate[]
+  savedViews             SavedView[]
 
   @@unique([organizationId, slug])
 }
@@ -311,6 +312,29 @@ model TaskTemplate {
 
   @@index([organizationId])
   @@index([workspaceId])
+}
+
+model SavedView {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String?
+  entityType     String
+  name           String
+  scope          String    @default("personal")
+  filters        Json
+  sortBy         String?
+  sortDirection  String?
+  createdBy      String
+  isPinned       Boolean   @default(false)
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, entityType])
+  @@index([workspaceId])
+  @@index([createdBy])
 }
 
 model TaskTemplateItem {

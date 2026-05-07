@@ -3,12 +3,15 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Upload } from "lucide-react";
 import { ExportCsvButton } from "@/components/export-csv-button";
 import { formatPhone } from "@/lib/format";
 import { ContactsTable } from "@/components/contacts/contacts-table";
+import { ViewPicker } from "@/components/saved-views/view-picker";
+import { FilterBar } from "@/components/saved-views/filter-bar";
+import { buildContactWhere } from "@/lib/saved-views/build-where";
+import { decodeContactFilters } from "@/lib/saved-views/url-encoder";
+import { listViews } from "@/app/actions/saved-views";
 import type { ContactRow } from "@/components/contacts/contacts-table";
 
 export const metadata: Metadata = { title: "Contacts" };
@@ -16,7 +19,7 @@ export const metadata: Metadata = { title: "Contacts" };
 export default async function ContactsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; workspace?: string }>;
+  searchParams: Promise<Record<string, string>>;
 }) {
   const { orgId: clerkOrgId } = await auth();
   const params = await searchParams;
@@ -36,42 +39,32 @@ export default async function ContactsPage({
     );
   }
 
-  const [workspaces, contacts, allTags] = await Promise.all([
+  const sp = new URLSearchParams(params);
+  const filters = decodeContactFilters(sp);
+
+  const [workspaces, allTags, savedViews, contacts] = await Promise.all([
     db.workspace.findMany({
       where: { organizationId: org.id },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       select: { id: true, name: true, slug: true, color: true },
-    }),
-    db.contact.findMany({
-      where: {
-        organizationId: org.id,
-        ...(params.q
-          ? {
-              OR: [
-                { firstName: { contains: params.q, mode: "insensitive" } },
-                { lastName: { contains: params.q, mode: "insensitive" } },
-                { email: { contains: params.q, mode: "insensitive" } },
-              ],
-            }
-          : {}),
-        ...(params.workspace
-          ? { contactWorkspaces: { some: { workspace: { slug: params.workspace } } } }
-          : {}),
-      },
-      include: {
-        contactTags: { include: { tag: true } },
-        contactWorkspaces: { include: { workspace: { select: { name: true, slug: true } } } },
-      },
-      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     }),
     db.tag.findMany({
       where: { organizationId: org.id },
       orderBy: { name: "asc" },
       select: { id: true, name: true, color: true },
     }),
+    listViews("contact"),
+    db.contact.findMany({
+      where: buildContactWhere(filters, org.id),
+      include: {
+        contactTags: { include: { tag: true } },
+        contactWorkspaces: { include: { workspace: { select: { name: true, slug: true } } } },
+      },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    }),
   ]);
 
-  // Price range special render
+  // Price range display
   const priceRangeDefs = await db.customFieldDefinition.findMany({
     where: { organizationId: org.id, fieldKey: { in: ["price_range_min", "price_range_max"] }, entityType: "contact" },
     select: { id: true, fieldKey: true },
@@ -103,24 +96,16 @@ export default async function ContactsPage({
     return `up to ${fmt(p.max!)}`;
   }
 
-  // Serialize contacts for the client component
   const rows: ContactRow[] = contacts.map((c) => ({
-    id:         c.id,
-    firstName:  c.firstName,
-    lastName:   c.lastName,
-    email:      c.email,
-    phone:      formatPhone(c.phone),
+    id:          c.id,
+    firstName:   c.firstName,
+    lastName:    c.lastName,
+    email:       c.email,
+    phone:       formatPhone(c.phone),
     temperature: c.temperature,
-    priceRange: fmtPriceRange(c.id),
-    workspaces: c.contactWorkspaces.map((cw) => ({
-      name: cw.workspace.name,
-      slug: cw.workspace.slug,
-    })),
-    tags: c.contactTags.map((ct) => ({
-      id:    ct.tag.id,
-      name:  ct.tag.name,
-      color: ct.tag.color,
-    })),
+    priceRange:  fmtPriceRange(c.id),
+    workspaces:  c.contactWorkspaces.map((cw) => ({ name: cw.workspace.name, slug: cw.workspace.slug })),
+    tags:        c.contactTags.map((ct) => ({ id: ct.tag.id, name: ct.tag.name, color: ct.tag.color })),
   }));
 
   return (
@@ -128,7 +113,7 @@ export default async function ContactsPage({
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-[#0F2540]">Contacts</h1>
         <div className="flex items-center gap-2">
-          <ExportCsvButton filters={{ q: params.q, workspace: params.workspace }} />
+          <ExportCsvButton filters={{ q: filters.q, workspace: filters.workspaceIds?.[0] }} />
           <Link href="/contacts/import">
             <Button variant="outline" size="sm">
               <Upload className="mr-1.5 h-4 w-4" />
@@ -144,24 +129,26 @@ export default async function ContactsPage({
         </div>
       </div>
 
-      <div className="mb-4 flex gap-3">
-        <form className="flex-1">
-          <Input name="q" placeholder="Search contacts..." defaultValue={params.q ?? ""} className="max-w-sm" />
-          {params.workspace && <input type="hidden" name="workspace" value={params.workspace} />}
-        </form>
-        {workspaces.length > 0 && (
-          <div className="flex items-center gap-2">
-            {workspaces.map((ws) => (
-              <Link key={ws.id}
-                href={params.workspace === ws.slug ? "/contacts" : `/contacts?workspace=${ws.slug}${params.q ? `&q=${params.q}` : ""}`}>
-                <Badge variant={params.workspace === ws.slug ? "default" : "outline"} className="cursor-pointer">
-                  {ws.name}
-                </Badge>
-              </Link>
-            ))}
-          </div>
-        )}
+      {/* View picker + filter bar */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <ViewPicker
+          entityType="contact"
+          initialViews={savedViews}
+          currentFilters={filters}
+          workspaces={workspaces}
+          defaultLabel="All contacts"
+        />
+        <div className="h-5 w-px" style={{ background: "#E8DFC8" }} />
+        <FilterBar
+          entityType="contact"
+          workspaces={workspaces}
+          tags={allTags}
+        />
       </div>
+
+      <p className="mb-3 text-sm" style={{ color: "#3D5775" }}>
+        {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
+      </p>
 
       <ContactsTable
         contacts={rows}
