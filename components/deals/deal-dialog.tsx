@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { X, ChevronRight } from "lucide-react";
+import { X, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +42,7 @@ type Props = {
   stages: SerializedStage[];
   contacts: ContactOption[];
   workspaceId: string;
+  workspaceSlug?: string;
   defaultStageId?: string;
   onCreated: (deal: SerializedDeal) => void;
   onUpdated: (deal: SerializedDeal, originalStageId: string) => void;
@@ -55,6 +56,7 @@ export function DealDialog({
   stages,
   contacts,
   workspaceId,
+  workspaceSlug,
   defaultStageId,
   onCreated,
   onUpdated,
@@ -196,9 +198,23 @@ export function DealDialog({
       <div className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b px-5 py-4">
-          <h2 className="text-base font-semibold text-[#0F2540]">
-            {mode === "create" ? "New Deal" : "Edit Deal"}
-          </h2>
+          <div className="flex items-center gap-2 min-w-0">
+            <h2 className="text-base font-semibold text-[#0F2540] truncate">
+              {mode === "create" ? "New Deal" : "Edit Deal"}
+            </h2>
+            {mode === "edit" && deal && workspaceSlug && (
+              <a
+                href={`/workspaces/${workspaceSlug}/deals/${deal.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0 flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium transition-colors hover:bg-[#E2F0EE]"
+                style={{ color: "#1F8A8A" }}
+                title="Open full view"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Full view
+              </a>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}

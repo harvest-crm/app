@@ -12,7 +12,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { Plus } from "lucide-react";
+import { Plus, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { moveDealToStage } from "@/app/actions/deals";
@@ -41,11 +41,13 @@ function DealCard({
   deal,
   isPending,
   isOverlay,
+  workspaceSlug,
   onClick,
 }: {
   deal: SerializedDeal;
   isPending?: boolean;
   isOverlay?: boolean;
+  workspaceSlug?: string;
   onClick?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -74,7 +76,21 @@ function DealCard({
         isOverlay && "rotate-1 cursor-grabbing shadow-xl ring-2 ring-[#1F8A8A]",
       )}
     >
-      <p className="text-sm font-medium leading-snug text-[#0F2540]">{deal.title}</p>
+      <div className="flex items-start justify-between gap-1">
+        <p className="text-sm font-medium leading-snug text-[#0F2540]">{deal.title}</p>
+        {workspaceSlug && (
+          <a
+            href={`/workspaces/${workspaceSlug}/deals/${deal.id}`}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            title="Open full view"
+            className="shrink-0 rounded p-0.5 opacity-40 hover:opacity-100 transition-opacity"
+            style={{ color: "#1F8A8A" }}
+          >
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
+      </div>
 
       {deal.contact && (
         <a
@@ -119,12 +135,14 @@ function KanbanColumn({
   deals,
   pendingMoves,
   isFirst,
+  workspaceSlug,
   onDealClick,
 }: {
   stage: SerializedStage;
   deals: SerializedDeal[];
   pendingMoves: Set<string>;
   isFirst: boolean;
+  workspaceSlug?: string;
   onDealClick: (deal: SerializedDeal) => void;
 }) {
   const { isOver, setNodeRef } = useDroppable({ id: stage.id });
@@ -177,6 +195,7 @@ function KanbanColumn({
             key={deal.id}
             deal={deal}
             isPending={pendingMoves.has(deal.id)}
+            workspaceSlug={workspaceSlug}
             onClick={() => onDealClick(deal)}
           />
         ))}
@@ -407,6 +426,7 @@ export function KanbanBoard({
               deals={dealsByStage[stage.id] ?? []}
               pendingMoves={pendingMoves}
               isFirst={i === 0}
+              workspaceSlug={workspace.slug}
               onDealClick={setEditingDeal}
             />
           ))}
@@ -438,6 +458,7 @@ export function KanbanBoard({
           stages={stages}
           contacts={contacts}
           workspaceId={workspace.id}
+          workspaceSlug={workspace.slug}
           onCreated={handleDealCreated}
           onUpdated={handleDealUpdated}
           onDeleted={handleDealDeleted}

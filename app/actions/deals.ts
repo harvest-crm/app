@@ -214,3 +214,45 @@ export async function deleteDeal(
   revalidatePath(`/workspaces/${deal.workspace.slug}/deals`);
   return { success: true };
 }
+
+export async function linkContactToDeal(
+  dealId: string,
+  contactId: string | null,
+): Promise<{ success: true } | { error: string }> {
+  const { organizationId } = await requireOrg();
+
+  const deal = await db.deal.findFirst({ where: { id: dealId, organizationId }, include: { workspace: true } });
+  if (!deal) return { error: "Deal not found" };
+
+  if (contactId) {
+    const contact = await db.contact.findFirst({ where: { id: contactId, organizationId } });
+    if (!contact) return { error: "Contact not found" };
+  }
+
+  await db.deal.update({ where: { id: dealId }, data: { contactId } });
+  revalidatePath(`/workspaces/${deal.workspace.slug}/deals/${dealId}`);
+  return { success: true };
+}
+
+export async function updateDealInline(
+  dealId: string,
+  data: { title?: string; value?: number | null; notes?: string | null },
+): Promise<{ success: true } | { error: string }> {
+  const { organizationId } = await requireOrg();
+
+  const deal = await db.deal.findFirst({ where: { id: dealId, organizationId }, include: { workspace: true } });
+  if (!deal) return { error: "Deal not found" };
+
+  await db.deal.update({
+    where: { id: dealId },
+    data: {
+      ...(data.title !== undefined ? { title: data.title } : {}),
+      ...(data.value !== undefined ? { value: data.value } : {}),
+      ...(data.notes !== undefined ? { notes: data.notes } : {}),
+    },
+  });
+
+  revalidatePath(`/workspaces/${deal.workspace.slug}/deals`);
+  revalidatePath(`/workspaces/${deal.workspace.slug}/deals/${dealId}`);
+  return { success: true };
+}
