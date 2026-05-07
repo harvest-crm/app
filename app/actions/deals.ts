@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { runStageAutomation } from "@/lib/automations/run-stage-automation";
 import type { SerializedDeal } from "@/components/deals/types";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -110,7 +111,7 @@ export async function updateDeal(
   id: string,
   formData: FormData
 ): Promise<{ deal: SerializedDeal } | { error: string }> {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const existing = await db.deal.findFirst({
     where: { id, organizationId },
@@ -144,6 +145,14 @@ export async function updateDeal(
     include: contactInclude,
   });
 
+  // Fire automation if stage changed
+  if (stageId !== existing.stageId) {
+    void runStageAutomation({
+      dealId: id, newStageId: stageId, oldStageId: existing.stageId,
+      organizationId, userId, contactId: parsed.data.contactId || existing.contactId,
+    });
+  }
+
   revalidatePath(`/workspaces/${existing.workspace.slug}/deals`);
   return { deal: serializeDeal(deal) };
 }
@@ -152,7 +161,7 @@ export async function moveDealToStage(
   dealId: string,
   stageId: string
 ): Promise<{ success: true } | { error: string }> {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const deal = await db.deal.findFirst({
     where: { id: dealId, organizationId },
@@ -160,10 +169,15 @@ export async function moveDealToStage(
   });
   if (!deal) return { error: "Deal not found" };
 
+  // Skip if not actually a stage change
+  if (deal.stageId === stageId) return { success: true };
+
   const stage = await db.stage.findFirst({
     where: { id: stageId, workspaceId: deal.workspaceId },
   });
   if (!stage) return { error: "Stage not found in this workspace" };
+
+  const oldStageId = deal.stageId;
 
   await db.deal.update({
     where: { id: dealId },
@@ -172,6 +186,12 @@ export async function moveDealToStage(
       movedToStageAt: new Date(),
       status: stage.isTerminal ? (stage.terminalOutcome ?? "open") : "open",
     },
+  });
+
+  // Fire automation (non-blocking: errors are caught inside)
+  void runStageAutomation({
+    dealId, newStageId: stageId, oldStageId,
+    organizationId, userId, contactId: deal.contactId,
   });
 
   revalidatePath(`/workspaces/${deal.workspace.slug}/deals`);

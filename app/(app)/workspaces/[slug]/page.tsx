@@ -41,7 +41,7 @@ export default async function WorkspacePage({
         <h1 className="text-2xl font-semibold text-[#0F2540]">{workspace.name}</h1>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Link href={`/workspaces/${slug}/deals`}>
           <Button variant="outline">Deals</Button>
         </Link>
@@ -50,6 +50,9 @@ export default async function WorkspacePage({
         </Link>
         <Link href={`/workspaces/${slug}/fields`}>
           <Button variant="outline">Custom Fields</Button>
+        </Link>
+        <Link href={`/workspaces/${slug}/automations`}>
+          <Button variant="outline">⚡ Automations</Button>
         </Link>
       </div>
 

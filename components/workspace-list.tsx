@@ -17,7 +17,8 @@ import { Pencil, Trash2, Plus, Check, X, ExternalLink } from "lucide-react";
 import type { Workspace } from "@/app/generated/prisma/client";
 
 const TEMPLATES = [
-  { value: "real_estate", label: "Real Estate" },
+  { value: "real_estate_residential", label: "Real Estate (Residential)" },
+  { value: "real_estate", label: "Real Estate (Classic)" },
   { value: "web_design", label: "Web Design" },
   { value: "coaching", label: "Coaching" },
   { value: "consulting", label: "Consulting" },

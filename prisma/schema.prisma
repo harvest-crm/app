@@ -56,6 +56,7 @@ model Workspace {
   tasks                  Task[]
   customFieldDefinitions CustomFieldDefinition[]
   documents              Document[]
+  automations            StageAutomation[]
 
   @@unique([organizationId, slug])
 }
@@ -108,7 +109,42 @@ model Stage {
   isTerminal      Boolean   @default(false)
   terminalOutcome String?
 
-  deals Deal[]
+  deals      Deal[]
+  automation StageAutomation?
+}
+
+model StageAutomation {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  stageId        String   @unique
+  isEnabled      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  workspace Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stage     Stage                @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  tasks     StageAutomationTask[]
+
+  @@index([organizationId])
+  @@index([workspaceId])
+}
+
+model StageAutomationTask {
+  id                    String   @id @default(cuid())
+  automationId          String
+  title                 String
+  description           String?
+  taskType              String   @default("other")
+  priority              String   @default("medium")
+  dueOffsetDays         Int      @default(0)
+  reminderOffsetMinutes Int?
+  sortOrder             Int      @default(0)
+  createdAt             DateTime @default(now())
+
+  automation StageAutomation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId])
 }
 
 model Deal {
