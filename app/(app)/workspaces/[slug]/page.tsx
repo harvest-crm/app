@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { BarChart3 } from "lucide-react";
 import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -53,6 +54,12 @@ export default async function WorkspacePage({
         </Link>
         <Link href={`/workspaces/${slug}/automations`}>
           <Button variant="outline">⚡ Automations</Button>
+        </Link>
+        <Link href={`/workspaces/${slug}/analytics`}>
+          <Button variant="outline">
+            <BarChart3 className="mr-1.5 h-4 w-4" />
+            Analytics
+          </Button>
         </Link>
       </div>
 
