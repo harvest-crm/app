@@ -10,7 +10,7 @@ const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Covenant CRM",
+  title: { default: "Covenant CRM", template: "%s · Covenant CRM" },
   description: "CRM for professionals",
 };
 

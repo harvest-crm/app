@@ -1,15 +1,19 @@
 type Props = {
   size?: number;
   className?: string;
+  thick?: boolean; // wider cross bars for better legibility at small sizes
 };
 
 /**
- * Covenant CRM logomark — white thin Latin cross on a stone-600 rounded tile.
- * Vertical bar: 9% width, runs 12.5%–87.5% of height (2:1 below:above crossbar).
- * Horizontal bar: 37.5% width, 9% height, positioned at ~34% from top.
- * Tile: #475569 fill, rx proportional to size.
+ * Covenant CRM logomark — white thin Latin cross on a teal (#1F8A8A) rounded tile.
+ * Vertical bar: centered at x=16, horizontal bar at y=11-14.
+ * thick=true widens bars from 3→4 units for sidebar at 20px.
  */
-export function Logo({ size = 24, className }: Props) {
+export function Logo({ size = 24, className, thick = false }: Props) {
+  const bar = thick ? 4 : 3;
+  const vx  = 16 - bar / 2;  // center at x=16
+  const hh  = bar;            // horizontal bar height same as vertical bar width
+
   return (
     <svg
       width={size}
@@ -20,12 +24,11 @@ export function Logo({ size = 24, className }: Props) {
       className={className}
       aria-hidden="true"
     >
-      {/* Slate tile */}
       <rect width="32" height="32" rx="6" fill="#1F8A8A" />
-      {/* Vertical bar — centered horizontally, 3 wide, y 4–28 */}
-      <rect x="14.5" y="4" width="3" height="24" fill="#FFFFFF" />
-      {/* Horizontal bar — 12 wide, 3 tall, centered at x=16, y 11–14 */}
-      <rect x="10" y="11" width="12" height="3" fill="#FFFFFF" />
+      {/* Vertical bar */}
+      <rect x={vx} y="4" width={bar} height="24" fill="#FFFFFF" />
+      {/* Horizontal bar */}
+      <rect x="10" y="11" width="12" height={hh} fill="#FFFFFF" />
     </svg>
   );
 }

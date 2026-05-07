@@ -4,21 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Home, Users, Tag, Settings, Building2, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { useSearch } from "@/components/search-modal";
 import type { Workspace } from "@/app/generated/prisma/client";
 
-// Locked palette — no Tailwind color names
+// Locked palette
 const C = {
-  canvas:        "#F5EFE0",
-  border:        "#E8DFC8",
-  navy:          "#0F2540",
-  navySecondary: "#3D5775",
-  teal:          "#1F8A8A",
-  tealHover:     "#1A7575",
-  tealTint:      "#E2F0EE",
-  inputBg:       "#FBF8F0",
-  white:         "#FFFFFF",
+  canvas:         "#F5EFE0",
+  border:         "#E8DFC8",
+  navy:           "#0F2540",
+  navySecondary:  "#3D5775",
+  teal:           "#1F8A8A",
+  tealActive:     "#D0E5E2",  // slightly stronger than #E2F0EE
+  inputBg:        "#FBF8F0",
 } as const;
 
 const NAV_ITEMS = [
@@ -27,27 +26,47 @@ const NAV_ITEMS = [
   { href: "/tags",     label: "Tags",     icon: Tag },
 ];
 
-type SidebarProps = { workspaces: Workspace[] };
+type SidebarProps = {
+  workspaces: Workspace[];
+  isOpen?: boolean;
+  onClose?: () => void;
+};
 
-export function Sidebar({ workspaces }: SidebarProps) {
+export function Sidebar({ workspaces, isOpen = false, onClose }: SidebarProps) {
   const pathname    = usePathname();
   const { setOpen } = useSearch();
 
-  function navLink(href: string, active: boolean) {
+  function navStyle(href: string, active: boolean): React.CSSProperties {
     return {
-      background: active ? C.tealTint : "transparent",
-      color:      active ? C.teal     : C.navySecondary,
+      background: active ? C.tealActive : "transparent",
+      color:      active ? C.navy       : C.navySecondary,
+      // Inset left border on active — no layout shift
+      boxShadow:  active ? "inset 3px 0 0 #1F8A8A" : "none",
+      fontWeight: active ? 500 : 400,
     };
+  }
+
+  function handleHover(e: React.MouseEvent, active: boolean, enter: boolean) {
+    if (active) return;
+    const el = e.currentTarget as HTMLElement;
+    el.style.background = enter ? C.tealActive : "transparent";
+    el.style.color      = enter ? C.navy       : C.navySecondary;
   }
 
   return (
     <aside
-      className="flex h-screen w-56 flex-col border-r"
+      className={cn(
+        "flex h-screen w-56 flex-col border-r",
+        // Mobile: fixed overlay, slide in/out
+        "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50",
+        "max-md:transition-transform max-md:duration-300 max-md:ease-in-out",
+        !isOpen && "max-md:-translate-x-full",
+      )}
       style={{ background: C.canvas, borderColor: C.border, color: C.navy }}
     >
       {/* Brand */}
       <div className="flex items-center gap-2.5 border-b px-4 py-3.5" style={{ borderColor: C.border }}>
-        <Logo size={20} />
+        <Logo size={20} thick />
         <span className="text-sm font-semibold tracking-tight" style={{ color: C.navy }}>
           Covenant CRM
         </span>
@@ -74,7 +93,12 @@ export function Sidebar({ workspaces }: SidebarProps) {
             elements: {
               rootBox: "w-full",
               organizationSwitcherTrigger:
-                `w-full justify-start gap-2 rounded-md px-2 py-1.5 text-sm`,
+                "w-full justify-start gap-2 rounded-md px-2 py-1.5 text-sm",
+              // Teal org avatar fallback
+              avatarBox:
+                "!h-6 !w-6 !rounded-full !bg-[#1F8A8A] !text-white !text-[11px] !font-semibold",
+              organizationPreviewAvatarBox:
+                "!h-6 !w-6 !rounded-full !bg-[#1F8A8A]",
             },
           }}
         />
@@ -89,14 +113,11 @@ export function Sidebar({ workspaces }: SidebarProps) {
               <li key={href}>
                 <Link
                   href={href}
-                  className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors"
-                  style={navLink(href, active)}
-                  onMouseEnter={(e) => {
-                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: C.tealTint, color: C.navy });
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: C.navySecondary });
-                  }}
+                  className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors"
+                  style={navStyle(href, active)}
+                  onMouseEnter={(e) => handleHover(e, active, true)}
+                  onMouseLeave={(e) => handleHover(e, active, false)}
+                  onClick={onClose}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   {label}
@@ -121,18 +142,19 @@ export function Sidebar({ workspaces }: SidebarProps) {
                   <li key={ws.id}>
                     <Link
                       href={`/workspaces/${ws.slug}`}
-                      className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors"
-                      style={navLink(`/workspaces/${ws.slug}`, active)}
-                      onMouseEnter={(e) => {
-                        if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: C.tealTint, color: C.navy });
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: C.navySecondary });
-                      }}
+                      className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors"
+                      style={navStyle(`/workspaces/${ws.slug}`, active)}
+                      onMouseEnter={(e) => handleHover(e, active, true)}
+                      onMouseLeave={(e) => handleHover(e, active, false)}
+                      onClick={onClose}
                     >
-                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: ws.color }} />
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: ws.color }}
+                      />
                       <Building2 className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{ws.name}</span>
+                      {/* Allow wrapping on long workspace names */}
+                      <span style={{ overflowWrap: "anywhere", lineHeight: 1.3 }}>{ws.name}</span>
                     </Link>
                   </li>
                 );
@@ -158,14 +180,11 @@ export function Sidebar({ workspaces }: SidebarProps) {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors"
-                    style={navLink(href, active)}
-                    onMouseEnter={(e) => {
-                      if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: C.tealTint, color: C.navy });
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: C.navySecondary });
-                    }}
+                    className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors"
+                    style={navStyle(href, active)}
+                    onMouseEnter={(e) => handleHover(e, active, true)}
+                    onMouseLeave={(e) => handleHover(e, active, false)}
+                    onClick={onClose}
                   >
                     <Settings className="h-4 w-4 shrink-0" />
                     {label}

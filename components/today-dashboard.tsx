@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Activity } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { TodayGreeting } from "@/components/today-greeting";
@@ -90,8 +91,10 @@ function StatCard({
 }) {
   const inner = (
     <div className="rounded-xl border bg-white p-5 transition-shadow hover:shadow-sm">
-      <p className="text-2xl font-semibold text-[#0F2540]">{value}</p>
-      <p className="mt-1 text-xs text-[#3D5775]">{label}</p>
+      <p className="text-2xl font-semibold" style={{ color: value > 0 ? "#0F2540" : "#3D5775" }}>
+        {value}
+      </p>
+      <p className="mt-1 text-xs" style={{ color: "#3D5775" }}>{label}</p>
     </div>
   );
   return href ? <a href={href}>{inner}</a> : inner;
@@ -147,6 +150,7 @@ type Props = {
     dealsMovedThisWeek: number;
     tasksCompletedThisWeek: number;
   };
+  firstWorkspaceSlug?: string;
   hasContacts: boolean;
 };
 
@@ -162,6 +166,7 @@ export function TodayDashboard({
   pipeline,
   stats,
   hasContacts,
+  firstWorkspaceSlug,
 }: Props) {
   const [overdue,   setOverdue]   = useState<SerializedTask[]>(initialOverdue);
   const [today,     setToday]     = useState<SerializedTask[]>(() => sortByPriorityThenDue(initialToday));
@@ -222,10 +227,10 @@ export function TodayDashboard({
     }
   }
 
-  const pipelineSummary =
-    pipeline.openDealsCount === 0
-      ? "No open deals"
-      : `${fmtCurrency(pipeline.totalValue)} across ${pipeline.openDealsCount} open deal${pipeline.openDealsCount !== 1 ? "s" : ""}`;
+  const pipelineValueText =
+    pipeline.openDealsCount > 0
+      ? `${fmtCurrency(pipeline.totalValue)} across ${pipeline.openDealsCount} open deal${pipeline.openDealsCount !== 1 ? "s" : ""}`
+      : "";
 
   const isAllClear =
     hasContacts &&
@@ -243,7 +248,12 @@ export function TodayDashboard({
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-8">
       {/* ── Greeting ── */}
-      <TodayGreeting name={firstName} pipelineSummary={pipelineSummary} />
+      <TodayGreeting
+        name={firstName}
+        openDealsCount={pipeline.openDealsCount}
+        pipelineValueText={pipelineValueText}
+        firstWorkspaceSlug={firstWorkspaceSlug}
+      />
 
       {/* ── No contacts empty state ── */}
       {!hasContacts && (
@@ -279,9 +289,11 @@ export function TodayDashboard({
             {today.length > 0 ? (
               <TaskList tasks={today} {...taskListProps} />
             ) : (
-              <p className="py-5 text-center text-sm text-[#3D5775]">
-                No tasks for today. Nice.
-              </p>
+              <div className="rounded-xl p-6 text-center" style={{ background: "#E2F0EE" }}>
+                <p className="text-sm italic" style={{ color: "#3D5775" }}>
+                  Nothing scheduled for today. Enjoy the breathing room.
+                </p>
+              </div>
             )}
           </div>
         </section>
@@ -322,8 +334,13 @@ export function TodayDashboard({
               />
             </div>
           ) : (
-            <p className="text-sm text-[#3D5775]">
-              No activity yet. Log a call, email, or note from a contact&apos;s page.
+            <p className="flex items-center gap-2 text-sm" style={{ color: "#3D5775" }}>
+              <Activity className="h-4 w-4 shrink-0" style={{ color: "#1F8A8A" }} />
+              No activity yet.{" "}
+              <a href="/contacts" style={{ color: "#1F8A8A" }}>
+                Log a call, email, or note
+              </a>{" "}
+              from a contact&apos;s page.
             </p>
           )}
         </section>

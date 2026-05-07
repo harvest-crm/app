@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -7,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Upload } from "lucide-react";
 import { ExportCsvButton } from "@/components/export-csv-button";
 import { formatPhone } from "@/lib/format";
+
+export const metadata: Metadata = { title: "Contacts" };
 
 const TEMPERATURE_COLORS = {
   hot: "bg-red-100 text-red-700",

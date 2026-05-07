@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { TodayDashboard } from "@/components/today-dashboard";
 import type { SerializedTask } from "@/app/actions/tasks";
 import type { SerializedActivity } from "@/app/actions/activities";
+
+export const metadata: Metadata = { title: "Today" };
+
+function titleCase(s: string) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
+}
 
 function serTask(t: {
   id: string;
@@ -46,7 +53,7 @@ export default async function TodayPage() {
   if (!org) return null;
 
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
-  const firstName = user?.firstName || email.split("@")[0] || "there";
+  const firstName = titleCase(user?.firstName || email.split("@")[0] || "there");
 
   const now = new Date();
   const startOfToday = new Date(
@@ -65,6 +72,7 @@ export default async function TodayPage() {
     pipelineSum,
     openDealCount,
     contactCount,
+    firstWorkspace,
   ] = await Promise.all([
     // Overdue: dueAt < start-of-today AND not completed
     db.task.findMany({
@@ -133,6 +141,13 @@ export default async function TodayPage() {
 
     // Whether org has any contacts at all
     db.contact.count({ where: { organizationId: org.id } }),
+
+    // First workspace for "visit workspace" CTA
+    db.workspace.findFirst({
+      where: { organizationId: org.id },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { slug: true },
+    }),
   ]);
 
   // Build contact name map for activities
@@ -171,6 +186,7 @@ export default async function TodayPage() {
       }}
       stats={{ newContacts, dealsMovedThisWeek, tasksCompletedThisWeek }}
       hasContacts={contactCount > 0}
+      firstWorkspaceSlug={firstWorkspace?.slug}
     />
   );
 }
