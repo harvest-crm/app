@@ -248,12 +248,14 @@ export function TodayDashboard({
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-8">
       {/* ── Greeting ── */}
-      <TodayGreeting
-        name={firstName}
-        openDealsCount={pipeline.openDealsCount}
-        pipelineValueText={pipelineValueText}
-        firstWorkspaceSlug={firstWorkspaceSlug}
-      />
+      <div className="rounded-xl border bg-white px-6 py-5" style={{ borderColor: "#E8DFC8" }}>
+        <TodayGreeting
+          name={firstName}
+          openDealsCount={pipeline.openDealsCount}
+          pipelineValueText={pipelineValueText}
+          firstWorkspaceSlug={firstWorkspaceSlug}
+        />
+      </div>
 
       {/* ── No contacts empty state ── */}
       {!hasContacts && (
@@ -313,9 +315,9 @@ export function TodayDashboard({
 
       {/* ── All clear ── */}
       {isAllClear && (
-        <div className="rounded-xl bg-emerald-50 p-8 text-center">
-          <p className="font-semibold text-emerald-700">All clear.</p>
-          <p className="mt-1 text-sm text-emerald-600">
+        <div className="rounded-xl p-8 text-center" style={{ background: "#E2F0EE" }}>
+          <p className="font-semibold" style={{ color: "#1F8A8A" }}>All clear.</p>
+          <p className="mt-1 text-sm" style={{ color: "#3D5775" }}>
             Nothing needs your attention right now.
           </p>
         </div>

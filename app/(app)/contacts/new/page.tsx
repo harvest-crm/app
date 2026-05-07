@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "New Contact" };
+
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { ContactForm } from "@/components/contact-form";

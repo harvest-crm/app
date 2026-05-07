@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Contact" };
+
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -148,10 +151,15 @@ export default async function ContactDetailPage({
 
   return (
     <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-[#0F2540]">
-          {contact.firstName} {contact.lastName}
-        </h1>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-[#0F2540]">
+            {contact.firstName} {contact.lastName}
+          </h1>
+          <p className="mt-0.5 text-sm text-[#3D5775]">
+            {contact.email ?? contact.phone ?? "No contact info"}
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <ApplyTemplateButton contactId={contact.id} />
           <DeleteContactButton contactId={contact.id} />
