@@ -8,6 +8,7 @@ import {
   FileText,
   MessageSquare,
   ArrowRightCircle,
+  ListChecks,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -24,7 +25,8 @@ export const ACTIVITY_TYPE_CONFIG = {
   meeting:      { icon: Calendar,         bg: "bg-purple-50",   text: "text-purple-600",   label: "Meeting"       },
   note:         { icon: FileText,         bg: "bg-[#E2F0EE]",   text: "text-[#3D5775]",    label: "Note"          },
   sms:          { icon: MessageSquare,    bg: "bg-green-50",    text: "text-green-600",    label: "SMS"           },
-  stage_change: { icon: ArrowRightCircle, bg: "bg-[#E2F0EE]",   text: "text-[#1F8A8A]",   label: "Stage changed" },
+  stage_change:     { icon: ArrowRightCircle, bg: "bg-[#E2F0EE]", text: "text-[#1F8A8A]", label: "Stage changed"    },
+  template_applied: { icon: ListChecks,       bg: "bg-[#E2F0EE]", text: "text-[#1F8A8A]", label: "Template applied"  },
 } as const;
 
 // ── Time formatting ───────────────────────────────────────────────────────────

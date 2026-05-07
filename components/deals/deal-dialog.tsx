@@ -19,6 +19,7 @@ import { ActivityFeed } from "@/components/activity-feed";
 import { TasksFeed } from "@/components/tasks-feed";
 import { DocumentsFeed } from "@/components/documents-feed";
 import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
+import { ApplyTemplateButton } from "@/components/task-templates/apply-template-button";
 import type { SerializedDeal, SerializedStage, ContactOption } from "./types";
 import type { SerializedActivity } from "@/app/actions/activities";
 import type { SerializedTask } from "@/app/actions/tasks";
@@ -332,6 +333,13 @@ export function DealDialog({
               </div>
             </div>
           </form>
+
+          {/* Apply template — edit mode only */}
+          {mode === "edit" && deal && (
+            <div className="border-t px-5 py-3">
+              <ApplyTemplateButton dealId={deal.id} />
+            </div>
+          )}
 
           {/* Custom Fields section — edit mode only */}
           {mode === "edit" && deal && (

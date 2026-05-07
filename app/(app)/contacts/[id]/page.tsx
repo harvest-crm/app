@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/contact-form";
 import { ContactTagManager } from "@/components/contact-tag-manager";
 import { ContactWorkspaceManager } from "@/components/contact-workspace-manager";
 import { DeleteContactButton } from "@/components/delete-contact-button";
+import { ApplyTemplateButton } from "@/components/task-templates/apply-template-button";
 import { TasksFeed } from "@/components/tasks-feed";
 import { ActivityFeed } from "@/components/activity-feed";
 import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
@@ -151,7 +152,10 @@ export default async function ContactDetailPage({
         <h1 className="text-2xl font-semibold text-[#0F2540]">
           {contact.firstName} {contact.lastName}
         </h1>
-        <DeleteContactButton contactId={contact.id} />
+        <div className="flex items-center gap-2">
+          <ApplyTemplateButton contactId={contact.id} />
+          <DeleteContactButton contactId={contact.id} />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
