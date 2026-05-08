@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { hasRole } from "@/lib/admin/server-permissions";
 import { seedRealEstateTemplates } from "@/lib/task-templates/seed-real-estate-templates";
 import { applyTaskTemplate } from "@/lib/task-templates/apply-template";
 
@@ -144,6 +145,7 @@ export async function deleteTemplate(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
   const { organizationId } = await requireOrg();
+  if (!(await hasRole("admin"))) return { error: "Admin permission required to delete templates." };
   const existing = await db.taskTemplate.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Template not found" };
   await db.taskTemplate.delete({ where: { id } });

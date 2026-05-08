@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { hasRole } from "@/lib/admin/server-permissions";
 import { seedWorkspaceTemplate } from "@/lib/profession-templates";
 import { randomBytes } from "crypto";
 
@@ -102,6 +103,7 @@ export async function updateWorkspace(formData: FormData) {
 
 export async function deleteWorkspace(id: string) {
   const { organizationId } = await requireOrg();
+  if (!(await hasRole("admin"))) return { error: "Admin permission required to delete a workspace." };
 
   const workspace = await db.workspace.findFirst({
     where: { id, organizationId },

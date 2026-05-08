@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { hasRole } from "@/lib/admin/server-permissions";
 import { applyTaskTemplate } from "@/lib/task-templates/apply-template";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -106,6 +107,7 @@ export async function bulkDeleteContacts(
   contactIds: string[],
 ): Promise<{ deleted: number } | { error: string }> {
   const { organizationId } = await requireOrg();
+  if (!(await hasRole("admin"))) return { error: "Admin permission required for bulk delete." };
 
   if (contactIds.length === 0) return { deleted: 0 };
   if (!(await validateOwnership(contactIds, organizationId))) {

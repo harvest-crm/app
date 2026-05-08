@@ -15,6 +15,7 @@ model Organization {
   createdAt  DateTime @default(now())
 
   members                OrganizationMember[]
+  invites                OrganizationInvite[]
   workspaces             Workspace[]
   contacts               Contact[]
   deals                  Deal[]
@@ -26,15 +27,41 @@ model Organization {
 }
 
 model OrganizationMember {
-  id             String       @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   clerkUserId    String
   email          String
-  role           String       @default("owner")
-  createdAt      DateTime     @default(now())
+  firstName      String?
+  lastName       String?
+  imageUrl       String?
+  role           String    @default("member")
+  joinedAt       DateTime  @default(now())
+  lastActiveAt   DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
 
   @@unique([organizationId, clerkUserId])
+  @@index([organizationId])
+  @@index([clerkUserId])
+}
+
+model OrganizationInvite {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy      String
+  email          String
+  role           String       @default("member")
+  status         String       @default("pending")
+  clerkInviteId  String?
+  expiresAt      DateTime?
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([clerkInviteId])
 }
 
 model Workspace {

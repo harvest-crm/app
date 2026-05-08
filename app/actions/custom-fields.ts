@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { hasRole } from "@/lib/admin/server-permissions";
 import { Prisma } from "@/app/generated/prisma/client";
 import { labelToKey } from "@/lib/format";
 
@@ -142,6 +143,7 @@ export async function deleteDefinition(
   id: string,
 ): Promise<{ success: true; affected: number } | { error: string }> {
   const { organizationId } = await requireOrg();
+  if (!(await hasRole("admin"))) return { error: "Admin permission required to delete custom fields." };
 
   const existing = await db.customFieldDefinition.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Not found" };

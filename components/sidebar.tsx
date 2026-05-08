@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { Home, Users, Tag, Settings, Building2, Search, ListChecks, CheckSquare, Mail } from "lucide-react";
+import { Home, Users, Tag, Settings, Building2, Search, ListChecks, CheckSquare, Mail, UsersRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { useSearch } from "@/components/search-modal";
@@ -173,11 +173,12 @@ export function Sidebar({ workspaces, isOpen = false, onClose }: SidebarProps) {
           </p>
           <ul className="space-y-0.5">
             {[
-              { href: "/settings/profile",          label: "Profile",          icon: Settings   },
-              { href: "/settings/task-templates", label: "Task Templates",  icon: ListChecks },
-              { href: "/settings/email-templates", label: "Email Templates", icon: Mail       },
-              { href: "/settings/email",           label: "Email Settings",  icon: Mail       },
-              { href: "/settings/workspaces",      label: "Workspaces",      icon: Settings   },
+              { href: "/settings/profile",          label: "Profile",          icon: Settings    },
+              { href: "/settings/team",           label: "Team",             icon: UsersRound  },
+              { href: "/settings/task-templates", label: "Task Templates",   icon: ListChecks  },
+              { href: "/settings/email-templates", label: "Email Templates", icon: Mail        },
+              { href: "/settings/email",           label: "Email Settings",  icon: Mail        },
+              { href: "/settings/workspaces",      label: "Workspaces",      icon: Settings    },
             ].map(({ href, label, icon: Icon }) => {
               const active = pathname === href;
               return (
