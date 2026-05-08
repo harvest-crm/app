@@ -27,6 +27,7 @@ export const ACTIVITY_TYPE_CONFIG = {
   sms:          { icon: MessageSquare,    bg: "bg-green-50",    text: "text-green-600",    label: "SMS"           },
   stage_change:     { icon: ArrowRightCircle, bg: "bg-[#E2F0EE]", text: "text-[#1F8A8A]", label: "Stage changed"    },
   template_applied: { icon: ListChecks,       bg: "bg-[#E2F0EE]", text: "text-[#1F8A8A]", label: "Template applied"  },
+  email_sent:       { icon: Mail,             bg: "bg-[#E2F0EE]", text: "text-[#1F8A8A]", label: "Email sent"        },
 } as const;
 
 // ── Time formatting ───────────────────────────────────────────────────────────

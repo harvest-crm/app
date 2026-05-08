@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { moveDealToStage, deleteDeal, updateDealInline } from "@/app/actions/deals";
 import { ApplyTemplateButton } from "@/components/task-templates/apply-template-button";
+import { ComposeEmailButton } from "@/components/email-compose/compose-email-button";
 import type { SerializedDeal, SerializedStage } from "@/components/deals/types";
 
 // ── Inline edit ───────────────────────────────────────────────────────────────
@@ -133,9 +134,10 @@ type Props = {
   deal: SerializedDeal;
   stages: SerializedStage[];
   workspaceSlug: string;
+  contactEmail?: string | null;
 };
 
-export function DealHeader({ deal, stages, workspaceSlug }: Props) {
+export function DealHeader({ deal, stages, workspaceSlug, contactEmail }: Props) {
   const router = useRouter();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [, startTransition] = useTransition();
@@ -177,6 +179,17 @@ export function DealHeader({ deal, stages, workspaceSlug }: Props) {
 
         {/* Actions */}
         <div className="flex shrink-0 items-center gap-2">
+          {(contactEmail !== undefined) && (
+            <ComposeEmailButton
+              context="deal"
+              dealId={deal.id}
+              dealTitle={deal.title}
+              dealValue={deal.value}
+              contactId={deal.contactId ?? undefined}
+              contactName={deal.contact ? `${deal.contact.firstName} ${deal.contact.lastName ?? ""}`.trim() : undefined}
+              contactEmail={contactEmail}
+            />
+          )}
           <ApplyTemplateButton dealId={deal.id} />
 
           {!confirmDelete ? (

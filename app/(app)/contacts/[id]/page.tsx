@@ -9,6 +9,7 @@ import { ContactTagManager } from "@/components/contact-tag-manager";
 import { ContactWorkspaceManager } from "@/components/contact-workspace-manager";
 import { DeleteContactButton } from "@/components/delete-contact-button";
 import { ApplyTemplateButton } from "@/components/task-templates/apply-template-button";
+import { ComposeEmailButton } from "@/components/email-compose/compose-email-button";
 import { TasksFeed } from "@/components/tasks-feed";
 import { ActivityFeed } from "@/components/activity-feed";
 import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
@@ -161,6 +162,12 @@ export default async function ContactDetailPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <ComposeEmailButton
+            context="contact"
+            contactId={contact.id}
+            contactName={`${contact.firstName} ${contact.lastName ?? ""}`.trim()}
+            contactEmail={contact.email}
+          />
           <ApplyTemplateButton contactId={contact.id} />
           <DeleteContactButton contactId={contact.id} />
         </div>

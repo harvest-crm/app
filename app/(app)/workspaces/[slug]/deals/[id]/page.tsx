@@ -57,7 +57,7 @@ export default async function DealDetailPage({
   const rawDeal = await db.deal.findFirst({
     where: { id, workspaceId: workspace.id, organizationId: org.id },
     include: {
-      contact: { select: { id: true, firstName: true, lastName: true } },
+      contact: { select: { id: true, firstName: true, lastName: true, email: true } },
     },
   });
   if (!rawDeal) notFound();
@@ -207,7 +207,12 @@ export default async function DealDetailPage({
 
       {/* Header card */}
       <div className="mb-5">
-        <DealHeader deal={deal} stages={stages} workspaceSlug={slug} />
+        <DealHeader
+          deal={deal}
+          stages={stages}
+          workspaceSlug={slug}
+          contactEmail={rawDeal.contact?.email ?? null}
+        />
       </div>
 
       {/* Two-column layout */}
