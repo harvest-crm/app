@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { seedRealEstateEmailTemplates } from "@/lib/email-templates/seed-real-estate-templates";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -74,6 +75,7 @@ export async function createEmailTemplate(input: {
   appliesTo: "contact" | "deal" | "both";
   workspaceId?: string | null;
 }): Promise<SerializedEmailTemplate | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const t = await db.emailTemplate.create({
@@ -107,6 +109,7 @@ export async function updateEmailTemplate(
     sortOrder: number;
   }>,
 ): Promise<SerializedEmailTemplate | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.emailTemplate.findFirst({ where: { id, organizationId } });
@@ -135,6 +138,7 @@ export async function updateEmailTemplate(
 export async function deleteEmailTemplate(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.emailTemplate.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Template not found" };
@@ -148,6 +152,7 @@ export async function deleteEmailTemplate(
 export async function duplicateEmailTemplate(
   id: string,
 ): Promise<SerializedEmailTemplate | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
   const existing = await db.emailTemplate.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Template not found" };
@@ -175,6 +180,7 @@ export async function duplicateEmailTemplate(
 export async function reorderEmailTemplates(
   ids: string[],
 ): Promise<{ success: true }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   await Promise.all(
     ids.map((id, idx) =>
@@ -188,6 +194,7 @@ export async function reorderEmailTemplates(
 // ── Seed real estate pack ─────────────────────────────────────────────────────
 
 export async function seedRealEstateEmailPack(): Promise<{ templatesCreated: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
   const result = await seedRealEstateEmailTemplates({ organizationId, workspaceId: null, userId });
   revalidatePath("/settings/email-templates");

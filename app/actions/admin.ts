@@ -7,6 +7,7 @@ import { requireOrg } from "@/lib/auth";
 import { hasRole } from "@/lib/admin/server-permissions";
 import { backfillMembers } from "@/lib/admin/backfill-members";
 import type { Role } from "@/lib/admin/permissions";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Serialized types ──────────────────────────────────────────────────────────
 
@@ -99,6 +100,7 @@ export async function inviteMember(
   email: string,
   role: "admin" | "member",
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, clerkOrgId, userId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required to invite members." };
 
@@ -162,6 +164,7 @@ export async function inviteMember(
 export async function revokeInvite(
   inviteId: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, clerkOrgId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required." };
 
@@ -199,6 +202,7 @@ export async function updateMemberRole(
   memberId: string,
   newRole: Role,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, clerkOrgId, userId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required." };
 
@@ -238,6 +242,7 @@ export async function updateMemberRole(
 export async function removeMember(
   memberId: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, clerkOrgId, userId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required." };
 

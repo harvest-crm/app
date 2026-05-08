@@ -8,11 +8,15 @@ datasource db {
 }
 
 model Organization {
-  id         String   @id @default(cuid())
-  clerkOrgId String   @unique
-  name       String
-  plan       String   @default("free")
-  createdAt  DateTime @default(now())
+  id                 String    @id @default(cuid())
+  clerkOrgId         String    @unique
+  name               String
+  plan               String    @default("free")
+  isSuspended        Boolean   @default(false)
+  suspendedAt        DateTime?
+  suspendedBy        String?
+  suspensionReason   String?
+  createdAt          DateTime  @default(now())
 
   members                OrganizationMember[]
   invites                OrganizationInvite[]
@@ -340,6 +344,33 @@ model TaskTemplate {
 
   @@index([organizationId])
   @@index([workspaceId])
+}
+
+model PlatformAdmin {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
+  email       String
+  grantedBy   String?
+  grantedAt   DateTime @default(now())
+  isActive    Boolean  @default(true)
+
+  @@index([clerkUserId])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  clerkUserId String
+  email      String
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([clerkUserId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
 }
 
 model EmailTemplate {

@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { REAL_ESTATE_RESIDENTIAL_STAGE_TEMPLATES } from "@/lib/profession-templates";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ export async function toggleStageAutomation(
   stageId: string,
   isEnabled: boolean,
 ): Promise<{ automation: SerializedAutomation } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const stage = await db.stage.findFirst({
@@ -96,6 +98,7 @@ export async function createAutomationTask(
     reminderOffsetMinutes?: number | null;
   },
 ): Promise<{ task: SerializedAutomationTask } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const automation = await db.stageAutomation.findFirst({
@@ -135,6 +138,7 @@ export async function updateAutomationTask(
     reminderOffsetMinutes: number | null;
   }>,
 ): Promise<{ task: SerializedAutomationTask } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.stageAutomationTask.findFirst({
@@ -163,6 +167,7 @@ export async function updateAutomationTask(
 export async function deleteAutomationTask(
   taskId: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.stageAutomationTask.findFirst({
@@ -181,6 +186,7 @@ export async function reorderAutomationTasks(
   automationId: string,
   orderedIds: string[],
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const automation = await db.stageAutomation.findFirst({ where: { id: automationId, organizationId } });
@@ -200,6 +206,7 @@ export async function reorderAutomationTasks(
 export async function applyRealEstateTemplate(
   workspaceId: string,
 ): Promise<{ applied: number; stages: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const workspace = await db.workspace.findFirst({ where: { id: workspaceId, organizationId } });

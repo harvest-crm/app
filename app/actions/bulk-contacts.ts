@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { hasRole } from "@/lib/admin/server-permissions";
 import { applyTaskTemplate } from "@/lib/task-templates/apply-template";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,7 @@ export async function bulkTagContacts(
   contactIds: string[],
   tagIds: string[],
 ): Promise<{ tagged: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   if (contactIds.length === 0 || tagIds.length === 0) return { tagged: 0 };
@@ -47,6 +49,7 @@ export async function bulkAssignWorkspace(
   workspaceId: string,
   replace: boolean,
 ): Promise<{ assigned: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   if (contactIds.length === 0) return { assigned: 0 };
@@ -73,6 +76,7 @@ export async function bulkApplyTemplate(
   contactIds: string[],
   templateId: string,
 ): Promise<{ contactsProcessed: number; tasksCreated: number; errors: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   if (contactIds.length === 0) return { contactsProcessed: 0, tasksCreated: 0, errors: 0 };
@@ -106,6 +110,7 @@ export async function bulkApplyTemplate(
 export async function bulkDeleteContacts(
   contactIds: string[],
 ): Promise<{ deleted: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required for bulk delete." };
 

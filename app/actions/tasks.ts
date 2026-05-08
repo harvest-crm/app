@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -123,6 +124,7 @@ function validateEnums(priority: string, taskType: string | null): string | null
 export async function createTask(
   formData: FormData
 ): Promise<{ task: SerializedTask } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const data = extractTaskData(formData);
 
@@ -154,6 +156,7 @@ export async function updateTask(
   id: string,
   formData: FormData
 ): Promise<{ task: SerializedTask } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.task.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Task not found" };
@@ -181,6 +184,7 @@ export async function updateTask(
 export async function completeTask(
   id: string
 ): Promise<{ task: SerializedTask } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.task.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Task not found" };
@@ -191,6 +195,7 @@ export async function completeTask(
 export async function reopenTask(
   id: string
 ): Promise<{ task: SerializedTask } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.task.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Task not found" };
@@ -201,6 +206,7 @@ export async function reopenTask(
 export async function deleteTask(
   id: string
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.task.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Task not found" };

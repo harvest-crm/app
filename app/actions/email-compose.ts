@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 export async function logEmailSent(input: {
   contactId?: string;
@@ -12,6 +13,7 @@ export async function logEmailSent(input: {
   bodyPreview: string;
   to: string;
 }): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const body = `To: ${input.to}\nSubject: ${input.subject}\n\n${input.bodyPreview}`;

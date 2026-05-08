@@ -7,6 +7,7 @@ import { requireOrg } from "@/lib/auth";
 import { hasRole } from "@/lib/admin/server-permissions";
 import { seedWorkspaceTemplate } from "@/lib/profession-templates";
 import { randomBytes } from "crypto";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -28,6 +29,7 @@ function toSlug(name: string) {
 }
 
 export async function createWorkspace(formData: FormData) {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const raw = {
@@ -72,6 +74,7 @@ export async function createWorkspace(formData: FormData) {
 }
 
 export async function updateWorkspace(formData: FormData) {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const raw = {
@@ -102,6 +105,7 @@ export async function updateWorkspace(formData: FormData) {
 }
 
 export async function deleteWorkspace(id: string) {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required to delete a workspace." };
 

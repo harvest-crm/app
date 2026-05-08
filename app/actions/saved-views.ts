@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import type { AnyFilters, EntityType } from "@/lib/saved-views/filter-types";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -90,6 +91,7 @@ export async function createView(input: {
   sortDirection?: string;
   workspaceId?: string | null;
 }): Promise<SerializedView | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const view = await db.savedView.create({
@@ -124,6 +126,7 @@ export async function updateView(
     workspaceId: string | null;
   }>,
 ): Promise<SerializedView | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const existing = await db.savedView.findFirst({
@@ -155,6 +158,7 @@ export async function updateView(
 export async function deleteView(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const view = await db.savedView.findFirst({ where: { id, organizationId } });
@@ -172,6 +176,7 @@ export async function deleteView(
 export async function togglePin(
   id: string,
 ): Promise<SerializedView | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const view = await db.savedView.findFirst({
@@ -192,6 +197,7 @@ export async function togglePin(
 export async function duplicateView(
   id: string,
 ): Promise<SerializedView | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const view = await db.savedView.findFirst({
@@ -223,6 +229,7 @@ export async function duplicateView(
 export async function reorderViews(
   ids: string[],
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   await Promise.all(
@@ -242,6 +249,7 @@ export async function reorderViews(
 export async function createSuggestedViews(
   entityType: EntityType,
 ): Promise<{ created: number }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const SUGGESTIONS: Array<{

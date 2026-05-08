@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { formatPhone } from "@/lib/format";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 const contactSchema = z.object({
   firstName: z.string().min(1).max(100),
@@ -51,6 +52,7 @@ function extractContactData(formData: FormData) {
 }
 
 export async function createContact(formData: FormData) {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const raw = extractContactData(formData);
   const parsed = contactSchema.safeParse(raw);
@@ -85,6 +87,7 @@ export async function createContact(formData: FormData) {
 }
 
 export async function updateContact(id: string, formData: FormData) {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.contact.findFirst({ where: { id, organizationId } });
@@ -107,6 +110,7 @@ export async function updateContact(id: string, formData: FormData) {
 }
 
 export async function deleteContact(id: string) {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.contact.findFirst({ where: { id, organizationId } });

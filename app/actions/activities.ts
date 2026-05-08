@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ function serialize(a: {
 export async function createActivity(
   formData: FormData
 ): Promise<{ activity: SerializedActivity } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const type = (formData.get("type") as string) ?? "";
@@ -96,6 +98,7 @@ export async function updateActivity(
   id: string,
   formData: FormData
 ): Promise<{ activity: SerializedActivity } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.activity.findFirst({ where: { id, organizationId } });
@@ -125,6 +128,7 @@ export async function updateActivity(
 export async function deleteActivity(
   id: string
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.activity.findFirst({ where: { id, organizationId } });

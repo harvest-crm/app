@@ -5,6 +5,7 @@ import { requireOrg } from "@/lib/auth";
 import { hasRole } from "@/lib/admin/server-permissions";
 import { seedRealEstateTemplates } from "@/lib/task-templates/seed-real-estate-templates";
 import { applyTaskTemplate } from "@/lib/task-templates/apply-template";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -98,6 +99,7 @@ export async function listApplicableTemplates(
 export async function createTemplate(data: {
   name: string; description?: string; appliesTo?: string; workspaceId?: string | null;
 }): Promise<{ template: SerializedTemplate } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
   if (!data.name.trim()) return { error: "Name is required" };
 
@@ -124,6 +126,7 @@ export async function updateTemplate(
   id: string,
   data: Partial<{ name: string; description: string | null; appliesTo: string }>,
 ): Promise<{ template: SerializedTemplate } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.taskTemplate.findFirst({ where: { id, organizationId } });
   if (!existing) return { error: "Template not found" };
@@ -144,6 +147,7 @@ export async function updateTemplate(
 export async function deleteTemplate(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required to delete templates." };
   const existing = await db.taskTemplate.findFirst({ where: { id, organizationId } });
@@ -155,6 +159,7 @@ export async function deleteTemplate(
 export async function duplicateTemplate(
   id: string,
 ): Promise<{ template: SerializedTemplate } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
   const src = await db.taskTemplate.findFirst({
     where: { id, organizationId },
@@ -196,6 +201,7 @@ export async function createTemplateItem(
   templateId: string,
   data: { title: string; description?: string; taskType?: string; priority?: string; dueOffsetDays?: number; reminderOffsetMinutes?: number | null },
 ): Promise<{ item: SerializedTemplateItem } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const tmpl = await db.taskTemplate.findFirst({
     where: { id: templateId, organizationId },
@@ -224,6 +230,7 @@ export async function updateTemplateItem(
   itemId: string,
   data: Partial<{ title: string; description: string | null; taskType: string; priority: string; dueOffsetDays: number; reminderOffsetMinutes: number | null }>,
 ): Promise<{ item: SerializedTemplateItem } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.taskTemplateItem.findFirst({
     where: { id: itemId }, include: { template: true },
@@ -248,6 +255,7 @@ export async function updateTemplateItem(
 export async function deleteTemplateItem(
   itemId: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const existing = await db.taskTemplateItem.findFirst({
     where: { id: itemId }, include: { template: true },
@@ -263,6 +271,7 @@ export async function reorderTemplateItems(
   templateId: string,
   orderedIds: string[],
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   const tmpl = await db.taskTemplate.findFirst({ where: { id: templateId, organizationId } });
   if (!tmpl) return { error: "Template not found" };
@@ -277,6 +286,7 @@ export async function reorderTemplateItems(
 // ── Seed + Apply ──────────────────────────────────────────────────────────────
 
 export async function seedRealEstatePack(): Promise<{ templatesCreated: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
   // Check if templates already exist
   const existing = await db.taskTemplate.count({ where: { organizationId } });

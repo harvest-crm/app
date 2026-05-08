@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { runStageAutomation } from "@/lib/automations/run-stage-automation";
 import type { SerializedDeal } from "@/components/deals/types";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -73,6 +74,7 @@ const contactInclude = {
 export async function createDeal(
   formData: FormData
 ): Promise<{ deal: SerializedDeal } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const raw = extractDealData(formData);
@@ -111,6 +113,7 @@ export async function updateDeal(
   id: string,
   formData: FormData
 ): Promise<{ deal: SerializedDeal } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const existing = await db.deal.findFirst({
@@ -161,6 +164,7 @@ export async function moveDealToStage(
   dealId: string,
   stageId: string
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const deal = await db.deal.findFirst({
@@ -201,6 +205,7 @@ export async function moveDealToStage(
 export async function deleteDeal(
   id: string
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const deal = await db.deal.findFirst({
@@ -219,6 +224,7 @@ export async function linkContactToDeal(
   dealId: string,
   contactId: string | null,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const deal = await db.deal.findFirst({ where: { id: dealId, organizationId }, include: { workspace: true } });
@@ -238,6 +244,7 @@ export async function updateDealInline(
   dealId: string,
   data: { title?: string; value?: number | null; notes?: string | null },
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const deal = await db.deal.findFirst({ where: { id: dealId, organizationId }, include: { workspace: true } });

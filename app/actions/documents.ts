@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { getSignedUploadUrl, getSignedDownloadUrl, deleteR2Object } from "@/lib/r2";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ function serialize(d: {
 export async function prepareUpload(
   formData: FormData,
 ): Promise<{ uploadUrl: string; r2Key: string } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const filename  = ((formData.get("filename")  as string) ?? "").trim();
@@ -93,6 +95,7 @@ export async function confirmUpload(
   contactId: string | null,
   dealId: string | null,
 ): Promise<{ doc: SerializedDocument } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId, userId } = await requireOrg();
 
   const existing = await db.document.findUnique({ where: { r2Key } });
@@ -133,6 +136,7 @@ export async function getDownloadUrl(
 export async function deleteDocument(
   documentId: string,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const doc = await db.document.findFirst({ where: { id: documentId, organizationId } });

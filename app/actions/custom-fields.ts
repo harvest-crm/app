@@ -5,6 +5,7 @@ import { requireOrg } from "@/lib/auth";
 import { hasRole } from "@/lib/admin/server-permissions";
 import { Prisma } from "@/app/generated/prisma/client";
 import { labelToKey } from "@/lib/format";
+import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ export async function listDefinitionsForWorkspace(
 export async function createDefinition(
   formData: FormData,
 ): Promise<{ def: SerializedFieldDef } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const fieldLabel = ((formData.get("fieldLabel") as string) ?? "").trim();
@@ -112,6 +114,7 @@ export async function updateDefinition(
   id: string,
   formData: FormData,
 ): Promise<{ def: SerializedFieldDef } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const existing = await db.customFieldDefinition.findFirst({ where: { id, organizationId } });
@@ -142,6 +145,7 @@ export async function updateDefinition(
 export async function deleteDefinition(
   id: string,
 ): Promise<{ success: true; affected: number } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
   if (!(await hasRole("admin"))) return { error: "Admin permission required to delete custom fields." };
 
@@ -161,6 +165,7 @@ export async function reorderDefinitions(
   entityType: string,
   orderedIds: string[],
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const owned = await db.customFieldDefinition.count({
@@ -192,6 +197,7 @@ export async function getValuesForEntity(
 export async function upsertFieldValue(
   formData: FormData,
 ): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
   const { organizationId } = await requireOrg();
 
   const definitionId = (formData.get("definitionId") as string) || "";
