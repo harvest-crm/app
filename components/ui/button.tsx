@@ -18,8 +18,13 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
         link: "text-[#1F8A8A] underline-offset-4 hover:underline",
+        // Covenant CRM design system variants
+        primary:       "bg-brand-navy text-white hover:bg-[#1e293b]",
+        gold:          "bg-brand-gold text-white hover:bg-[#a0782d]",
+        "crm-secondary":"bg-white border border-ink-200 text-ink-900 hover:bg-ink-50",
       },
       size: {
+        md: "h-8 gap-1.5 px-3 text-xs",
         default:
           "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",

@@ -1,251 +1,393 @@
-import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Contact" };
+import type { Metadata } from "next"
+export const metadata: Metadata = { title: "Contact" }
 
-import { notFound } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
-import { ContactForm } from "@/components/contact-form";
-import { ContactTagManager } from "@/components/contact-tag-manager";
-import { ContactWorkspaceManager } from "@/components/contact-workspace-manager";
-import { DeleteContactButton } from "@/components/delete-contact-button";
-import { ApplyTemplateButton } from "@/components/task-templates/apply-template-button";
-import { ComposeEmailButton } from "@/components/email-compose/compose-email-button";
-import { TasksFeed } from "@/components/tasks-feed";
-import { ActivityFeed } from "@/components/activity-feed";
-import { FieldValuesEditor } from "@/components/custom-fields/field-values-editor";
-import { DocumentsFeed } from "@/components/documents-feed";
-import type { SerializedTask } from "@/app/actions/tasks";
-import type { SerializedActivity } from "@/app/actions/activities";
-import type { FieldGroup } from "@/components/custom-fields/field-values-editor";
-import type { SerializedFieldDef } from "@/app/actions/custom-fields";
-import type { SerializedDocument } from "@/app/actions/documents";
+import { notFound } from "next/navigation"
+import { auth } from "@clerk/nextjs/server"
+import { db } from "@/lib/db"
+import {
+  IconPhone,
+  IconMessage,
+  IconMail,
+  IconCalendar,
+  IconMapPin,
+  IconSparkles,
+  IconHistory,
+  IconHome,
+  IconMicrophone,
+  IconMailOpened,
+  IconNote,
+  IconArrowRight,
+  IconCheck,
+  IconActivity,
+} from "@tabler/icons-react"
+import { Avatar } from "@/components/ui/avatar"
+import { Pill } from "@/components/ui/pill"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { buildLookingForDisplay, formatCurrency } from "@/lib/format"
+import { LifecycleStage } from "@/app/generated/prisma/client"
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+type Stage = LifecycleStage
+
+interface DisplayActivity {
+  id: string
+  type: string
+  title: string
+  body: string
+  occurredAt: Date
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+const STAGE_LABELS: Record<Stage, string> = {
+  LEAD:          "Lead",
+  WORKING:       "Working",
+  ACTIVE_BUYER:  "Active buyer",
+  ACTIVE_SELLER: "Active seller",
+  PAST_CLIENT:   "Past client",
+  SPHERE:        "Sphere",
+  INACTIVE:      "Inactive",
+  TRASH:         "Trash",
+}
+
+function pillVariantForStage(stage: Stage) {
+  switch (stage) {
+    case "LEAD":          return "info"
+    case "WORKING":       return "info"
+    case "ACTIVE_BUYER":  return "gold"
+    case "ACTIVE_SELLER": return "gold"
+    case "PAST_CLIENT":   return "purple"
+    case "SPHERE":        return "pink"
+    case "INACTIVE":      return "default"
+    case "TRASH":         return "default"
+    default: {
+      const _exhaustive: never = stage
+      void _exhaustive
+      return "default"
+    }
+  }
+}
+
+function activityIconProps(type: string): {
+  icon: React.ComponentType<{ size?: number; className?: string }>
+  bg: string
+  fg: string
+} {
+  switch (type) {
+    case "voice_note":    return { icon: IconMicrophone,  bg: "bg-brand-gold-tint", fg: "text-brand-gold" }
+    case "email":
+    case "email_opened":  return { icon: IconMailOpened,  bg: "bg-ink-100", fg: "text-ink-500" }
+    case "call":          return { icon: IconPhone,        bg: "bg-ink-100", fg: "text-ink-500" }
+    case "sms":           return { icon: IconMessage,      bg: "bg-ink-100", fg: "text-ink-500" }
+    case "note":          return { icon: IconNote,         bg: "bg-ink-100", fg: "text-ink-500" }
+    case "stage_change":  return { icon: IconArrowRight,   bg: "bg-ink-100", fg: "text-ink-500" }
+    case "task_completed":return { icon: IconCheck,        bg: "bg-ink-100", fg: "text-ink-500" }
+    case "showing":       return { icon: IconHome,         bg: "bg-ink-100", fg: "text-ink-500" }
+    default:              return { icon: IconActivity,     bg: "bg-ink-100", fg: "text-ink-500" }
+  }
+}
+
+function activityTitle(type: string): string {
+  switch (type) {
+    case "voice_note":   return "Voice note"
+    case "email":        return "Email sent"
+    case "email_opened": return "Email opened"
+    case "call":         return "Call"
+    case "sms":          return "Text sent"
+    case "note":         return "Note"
+    case "showing":        return "Showing"
+    case "stage_change":   return "Stage change"
+    case "task_completed": return "Task completed"
+    default:               return "Activity"
+  }
+}
+
+function formatRelative(date: Date): string {
+  const days = Math.floor((Date.now() - date.getTime()) / 86_400_000)
+  if (days === 0) return "Today"
+  if (days === 1) return "Yesterday"
+  if (days < 7)  return `${days}d ago`
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
+function formatDate(date: Date | null): string {
+  if (!date) return "—"
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+}
+
+
+// ── Mock data for fields not yet in schema ─────────────────────────────────
+
+const MOCK_ACTIVITIES: DisplayActivity[] = [
+  {
+    id: "m1",
+    type: "voice_note",
+    title: "Voice note",
+    body: "Focused on Memorial — large backyard, 3-car garage minimum. Approval through CrossCountry at $900K. Wants to see listings by end of month.",
+    occurredAt: new Date("2026-04-27T14:22:00"),
+  },
+  {
+    id: "m2",
+    type: "email_opened",
+    title: "Email opened",
+    body: `Opened "New listings in Memorial — this week's picks"`,
+    occurredAt: new Date("2026-04-22T09:14:00"),
+  },
+  {
+    id: "m3",
+    type: "call",
+    title: "Outbound call · 4m 12s",
+    body: "Discussed timeline, confirmed pre-approval is still active, scheduled Saturday showing.",
+    occurredAt: new Date("2026-04-18T11:30:00"),
+  },
+]
+
+// ── Page ───────────────────────────────────────────────────────────────────
 
 export default async function ContactDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>
 }) {
-  const { orgId: clerkOrgId } = await auth();
-  const { id } = await params;
-  if (!clerkOrgId) return null;
+  const { orgId: clerkOrgId } = await auth()
+  const { id } = await params
+  if (!clerkOrgId) return null
 
   const org = await db.organization.findUnique({
     where: { clerkOrgId },
     select: { id: true },
-  });
+  })
+  if (!org) return null
 
-  if (!org) return null;
+  const [contact, rawActivities, latestInsight] = await Promise.all([
+    db.contact.findFirst({
+      where: { id, organizationId: org.id },
+      include: {
+        contactTags: { include: { tag: true } },
+        buyerProfile: true,
+      },
+    }),
+    db.activity.findMany({
+      where: { contactId: id, organizationId: org.id },
+      orderBy: { occurredAt: "desc" },
+      take: 5,
+    }),
+    db.aiInsight.findFirst({
+      where: { contactId: id, organizationId: org.id, status: "PENDING" },
+      orderBy: [{ priority: "asc" }, { generatedAt: "desc" }],
+    }),
+  ])
 
-  const [contact, allTags, allWorkspaces, rawTasks, rawActivities, rawDocs] =
-    await Promise.all([
-      db.contact.findFirst({
-        where: { id, organizationId: org.id },
-        include: {
-          contactTags: { include: { tag: true } },
-          contactWorkspaces: { include: { workspace: true } },
-        },
-      }),
-      db.tag.findMany({
-        where: { organizationId: org.id },
-        orderBy: { name: "asc" },
-      }),
-      db.workspace.findMany({
-        where: { organizationId: org.id },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      }),
-      db.task.findMany({
-        where: { contactId: id, organizationId: org.id },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      }),
-      db.activity.findMany({
-        where: { contactId: id, organizationId: org.id },
-        orderBy: { occurredAt: "desc" },
-        take: 100,
-      }),
-      db.document.findMany({
-        where: { contactId: id, organizationId: org.id },
-        orderBy: { uploadedAt: "desc" },
-      }),
-    ]);
+  if (!contact) notFound()
 
-  if (!contact) notFound();
+  const tags = contact.contactTags.map((ct) => ct.tag.name)
+  const stage: Stage = contact.lifecycleStage
+  const city = [contact.city, contact.state].filter(Boolean).join(", ") || null
+  // Use DB-cached value first; fall back to most recent activity timestamp
+  const lastContactAt = contact.lastContactAt ?? rawActivities[0]?.occurredAt ?? null
+  const buyerProfile = contact.buyerProfile
+  const aiInsight = latestInsight
+  const pipelineEnteredAt = contact.pipelineEnteredAt
+  const lifetimeVolumeCents = contact.lifetimeVolumeCents
 
-  // Fetch custom field definitions for the contact's workspaces and existing values
-  const contactWorkspaceIds = contact.contactWorkspaces.map((cw) => cw.workspace.id);
-  const [rawFieldDefs, rawFieldValues] = await Promise.all([
-    contactWorkspaceIds.length > 0
-      ? db.customFieldDefinition.findMany({
-          where: { workspaceId: { in: contactWorkspaceIds }, entityType: "contact", organizationId: org.id },
-          orderBy: [{ workspaceId: "asc" }, { sortOrder: "asc" }],
-        })
-      : Promise.resolve([]),
-    db.customFieldValue.findMany({ where: { entityType: "contact", entityId: id } }),
-  ]);
-
-  function serDef(d: typeof rawFieldDefs[number]): SerializedFieldDef {
-    const opts = d.options as { choices?: string[] } | null;
-    return {
-      id: d.id, workspaceId: d.workspaceId, entityType: d.entityType,
-      fieldKey: d.fieldKey, fieldLabel: d.fieldLabel, fieldType: d.fieldType,
-      options: opts?.choices ?? [], isRequired: d.isRequired, sortOrder: d.sortOrder,
-    };
-  }
-
-  // Group defs by workspace
-  const defsByWs = new Map<string, SerializedFieldDef[]>();
-  for (const d of rawFieldDefs) {
-    if (d.workspaceId) {
-      const arr = defsByWs.get(d.workspaceId) ?? [];
-      arr.push(serDef(d));
-      defsByWs.set(d.workspaceId, arr);
-    }
-  }
-
-  const fieldGroups: FieldGroup[] = contact.contactWorkspaces
-    .filter((cw) => defsByWs.has(cw.workspace.id))
-    .map((cw) => ({
-      workspaceId: cw.workspace.id,
-      workspaceName: cw.workspace.name,
-      defs: defsByWs.get(cw.workspace.id)!,
-    }));
-
-  const fieldValues: Record<string, unknown> = {};
-  for (const v of rawFieldValues) fieldValues[v.definitionId] = v.value;
-
-  const docs: SerializedDocument[] = rawDocs.map((d) => ({
-    id: d.id,
-    r2Key: d.r2Key,
-    fileName: d.fileName,
-    mimeType: d.mimeType,
-    fileSize: d.fileSize,
-    uploadedAt: d.uploadedAt.toISOString(),
-    contactId: d.contactId,
-    dealId: d.dealId,
-  }));
-
-  const tasks: SerializedTask[] = rawTasks.map((t) => ({
-    id: t.id,
-    title: t.title,
-    description: t.description,
-    priority: t.priority,
-    taskType: t.taskType,
-    dueAt: t.dueAt?.toISOString() ?? null,
-    reminderAt: t.reminderAt?.toISOString() ?? null,
-    completedAt: t.completedAt?.toISOString() ?? null,
-    contactId: t.contactId,
-    dealId: t.dealId,
-    workspaceId: t.workspaceId,
-    createdAt: t.createdAt.toISOString(),
-  }));
-
-  const activities: SerializedActivity[] = rawActivities.map((a) => ({
-    id: a.id,
-    type: a.type,
-    body: a.body,
-    occurredAt: a.occurredAt.toISOString(),
-    createdAt: a.createdAt.toISOString(),
-    contactId: a.contactId,
-    dealId: a.dealId,
-    workspaceId: a.workspaceId,
-  }));
+  const displayActivities: DisplayActivity[] =
+    rawActivities.length > 0
+      ? rawActivities.map((a) => ({
+          id: a.id,
+          type: a.type,
+          title: activityTitle(a.type),
+          body: a.body,
+          occurredAt: a.occurredAt,
+        }))
+      : MOCK_ACTIVITIES
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#0F2540]">
+    <div className="max-w-[720px] mx-auto p-6 space-y-4">
+
+      {/* 3.1 Header ─────────────────────────────────────────────────────── */}
+      <div className="flex items-start gap-4">
+        <Avatar firstName={contact.firstName} lastName={contact.lastName} size="lg" />
+        <div className="flex-1 min-w-0">
+          <h2 className="text-[18px] font-medium text-ink-900 leading-snug">
             {contact.firstName} {contact.lastName}
-          </h1>
-          <p className="mt-0.5 text-sm text-[#3D5775]">
-            {contact.email ?? contact.phone ?? "No contact info"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ComposeEmailButton
-            context="contact"
-            contactId={contact.id}
-            contactName={`${contact.firstName} ${contact.lastName ?? ""}`.trim()}
-            contactEmail={contact.email}
-          />
-          <ApplyTemplateButton contactId={contact.id} />
-          <DeleteContactButton contactId={contact.id} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 space-y-6">
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Details
-            </h2>
-            <ContactForm contact={contact} />
+          </h2>
+          <div className="flex items-center flex-wrap gap-1.5 mt-2">
+            <Pill variant={pillVariantForStage(stage)}>
+              {STAGE_LABELS[stage]}
+            </Pill>
+            {tags.map((tag) => (
+              <Pill key={tag}>{tag}</Pill>
+            ))}
           </div>
-
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Custom Fields
-            </h2>
-            {fieldGroups.length > 0 ? (
-              <FieldValuesEditor
-                groups={fieldGroups}
-                initialValues={fieldValues}
-                entityType="contact"
-                entityId={contact.id}
-              />
-            ) : (
-              <p className="text-sm text-[#3D5775]">
-                Add this contact to a workspace to see custom fields.
-              </p>
+          <div className="flex items-center gap-3.5 mt-2.5">
+            {city && (
+              <span className="flex items-center gap-1 text-[13px] text-ink-500">
+                <IconMapPin size={14} />
+                {city}
+              </span>
+            )}
+            {contact.phone && (
+              <span className="flex items-center gap-1 text-[13px] text-ink-500">
+                <IconPhone size={14} />
+                {contact.phone}
+              </span>
             )}
           </div>
-
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Documents
-            </h2>
-            <DocumentsFeed initialDocuments={docs} contactId={contact.id} />
-          </div>
-
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Tasks
-            </h2>
-            <TasksFeed initialTasks={tasks} contactId={contact.id} />
-          </div>
-
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Activity
-            </h2>
-            <ActivityFeed initialActivities={activities} contactId={contact.id} />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="rounded-lg border bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Tags
-            </h2>
-            <ContactTagManager
-              contactId={contact.id}
-              contactTags={contact.contactTags.map((ct) => ct.tag)}
-              allTags={allTags}
-            />
-          </div>
-
-          <div className="rounded-lg border bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#3D5775]">
-              Workspaces
-            </h2>
-            <ContactWorkspaceManager
-              contactId={contact.id}
-              contactWorkspaces={contact.contactWorkspaces}
-              allWorkspaces={allWorkspaces}
-            />
-          </div>
         </div>
       </div>
+
+      {/* 3.2 Quick actions ───────────────────────────────────────────────── */}
+      <div className="grid grid-cols-4 gap-2">
+        <Button variant="primary" className="w-full justify-center gap-1.5 rounded-btn-lg text-xs h-8">
+          <IconPhone size={16} />
+          Call
+        </Button>
+        <Button variant="crm-secondary" className="w-full justify-center gap-1.5 rounded-btn-lg text-xs h-8">
+          <IconMessage size={16} />
+          Text
+        </Button>
+        <Button variant="crm-secondary" className="w-full justify-center gap-1.5 rounded-btn-lg text-xs h-8">
+          <IconMail size={16} />
+          Email
+        </Button>
+        <Button variant="crm-secondary" className="w-full justify-center gap-1.5 rounded-btn-lg text-xs h-8">
+          <IconCalendar size={16} />
+          Schedule
+        </Button>
+      </div>
+
+      {/* 3.3 AI insight — only rendered when a PENDING insight exists */}
+      {aiInsight && (
+        <div className="bg-brand-gold-tint-light border border-brand-gold-border rounded-card p-4">
+          <div className="flex items-center gap-1.5 mb-2">
+            <IconSparkles size={16} className="text-brand-gold shrink-0" />
+            <span className="text-[12px] font-medium text-brand-gold">AI insight</span>
+          </div>
+          <p className="text-[14px] text-ink-900 leading-relaxed mb-3">
+            {aiInsight.reason}
+          </p>
+          <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-3">
+            <p className="text-[13px] text-ink-500 leading-relaxed">
+              {aiInsight.suggestedMessage}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="gold" className="rounded-btn h-7 px-3 text-xs gap-1.5">
+              Send
+            </Button>
+            <Button variant="ghost" className="text-brand-gold hover:text-brand-gold hover:bg-transparent h-7 px-3 text-xs">
+              Edit
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* 3.4 Stats grid ──────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-4 gap-2">
+        {[
+          {
+            label: "Last contact",
+            value: lastContactAt ? formatRelative(lastContactAt) : "—",
+          },
+          {
+            label: "Lead source",
+            value: contact.source ?? "—",
+          },
+          {
+            label: "Lifetime volume",
+            value: formatCurrency(lifetimeVolumeCents ? Number(lifetimeVolumeCents) / 100 : null),
+          },
+          {
+            label: "In pipeline",
+            value: pipelineEnteredAt
+              ? Math.floor((Date.now() - pipelineEnteredAt.getTime()) / 86_400_000) + " days"
+              : "—",
+          },
+        ].map((stat) => (
+          <Card key={stat.label} padding="p-3">
+            <div className="text-[11px] text-ink-500 leading-none mb-1.5">{stat.label}</div>
+            <div className="text-[16px] font-medium text-ink-900 leading-none">{stat.value}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* 3.5 Buyer profile — only rendered when profile exists */}
+      {buyerProfile && (
+        <Card>
+          <div className="flex items-center gap-1.5 mb-3">
+            <IconHome size={16} className="text-ink-500 shrink-0" />
+            <span className="text-[12px] font-medium text-ink-500">Buyer profile</span>
+          </div>
+          <table className="w-full text-[13px]">
+            <tbody>
+              <tr className="border-t border-ink-100">
+                <td className="w-[110px] py-[5px] text-ink-500 align-top">Looking for</td>
+                <td className="py-[5px] text-ink-900">
+                  {buildLookingForDisplay(buyerProfile) ?? "—"}
+                </td>
+              </tr>
+              <tr className="border-t border-ink-100">
+                <td className="w-[110px] py-[5px] text-ink-500 align-middle">Pre-approved</td>
+                <td className="py-[5px] text-ink-900">
+                  <span className="flex items-center gap-1.5">
+                    {buyerProfile.preApproved && (
+                      <span className="inline-block w-2 h-2 rounded-full bg-success shrink-0" />
+                    )}
+                    {buyerProfile.preApproved ? "Yes" : "No"}
+                  </span>
+                </td>
+              </tr>
+              <tr className="border-t border-ink-100">
+                <td className="w-[110px] py-[5px] text-ink-500">Timeline</td>
+                <td className="py-[5px] text-ink-900">{buyerProfile.timelineLabel ?? "—"}</td>
+              </tr>
+              <tr className="border-t border-ink-100">
+                <td className="w-[110px] py-[5px] text-ink-500">Anniversary</td>
+                <td className="py-[5px] text-ink-900">
+                  {formatDate(buyerProfile.currentHomeClosingDate ?? null)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Card>
+      )}
+
+      {/* 3.6 Activity timeline ───────────────────────────────────────────── */}
+      <Card>
+        <div className="flex items-center gap-1.5 mb-4">
+          <IconHistory size={16} className="text-ink-500 shrink-0" />
+          <span className="text-[12px] font-medium text-ink-500">Recent activity</span>
+        </div>
+        <div className="space-y-[14px]">
+          {displayActivities.map((activity) => {
+            const { icon: ActivityIcon, bg, fg } = activityIconProps(activity.type)
+            return (
+              <div key={activity.id} className="flex items-start gap-3">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${bg}`}>
+                  <ActivityIcon size={14} className={fg} />
+                </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <span className="text-[13px] font-medium text-ink-900 truncate">
+                      {activity.title}
+                    </span>
+                    <span className="text-[11px] text-ink-400 shrink-0">
+                      {formatRelative(activity.occurredAt)}
+                    </span>
+                  </div>
+                  <p className="text-[13px] text-ink-500 leading-relaxed">
+                    {activity.body}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </Card>
+
     </div>
-  );
+  )
 }

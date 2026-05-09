@@ -7,12 +7,22 @@ import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
 import { formatPhone } from "@/lib/format";
 import { blockIfImpersonating } from "@/lib/admin/impersonation";
+import { LifecycleStage } from "@/app/generated/prisma/client";
+
+const PIPELINE_STAGES = new Set<LifecycleStage>([
+  LifecycleStage.WORKING,
+  LifecycleStage.ACTIVE_BUYER,
+  LifecycleStage.ACTIVE_SELLER,
+  LifecycleStage.PAST_CLIENT,
+]);
 
 const contactSchema = z.object({
   firstName: z.string().min(1).max(100),
   lastName: z.string().max(100).optional().nullable(),
   email: z.string().email().optional().nullable().or(z.literal("")),
   phone: z.string().max(30).optional().nullable(),
+  city: z.string().max(100).optional().nullable(),
+  state: z.string().max(50).optional().nullable(),
   source: z.string().max(100).optional().nullable(),
   sourceDetail: z.string().max(255).optional().nullable(),
   temperature: z.enum(["hot", "warm", "cold"]).default("warm"),
@@ -25,9 +35,10 @@ function normalizeContact(data: z.infer<typeof contactSchema>) {
   return {
     ...data,
     email: data.email || null,
-    // Strip non-digits so DB always holds clean digits (e.g. "5551234567")
     phone: data.phone ? data.phone.replace(/\D/g, "") || null : null,
     lastName: data.lastName || null,
+    city: data.city || null,
+    state: data.state || null,
     source: data.source || null,
     sourceDetail: data.sourceDetail || null,
     notes: data.notes || null,
@@ -42,6 +53,8 @@ function extractContactData(formData: FormData) {
     lastName: formData.get("lastName") || null,
     email: formData.get("email") || null,
     phone: formData.get("phone") || null,
+    city: formData.get("city") || null,
+    state: formData.get("state") || null,
     source: formData.get("source") || null,
     sourceDetail: formData.get("sourceDetail") || null,
     temperature: formData.get("temperature") || "warm",
@@ -246,4 +259,37 @@ export async function exportContactsToCsv(filters: {
   });
 
   return [CSV_HEADERS.join(","), ...rows].join("\r\n") + "\r\n";
+}
+
+// ── Lifecycle stage ─────────────────────────────────────────────────────────
+
+export async function updateContactLifecycleStage(
+  contactId: string,
+  newStage: LifecycleStage,
+): Promise<{ success: true } | { error: string }> {
+  await blockIfImpersonating();
+  const { organizationId } = await requireOrg();
+
+  const contact = await db.contact.findFirst({
+    where: { id: contactId, organizationId },
+    select: { id: true, lifecycleStage: true, pipelineEnteredAt: true },
+  });
+  if (!contact) return { error: "Not found" };
+
+  if (contact.lifecycleStage === newStage) return { success: true };
+
+  const isFirstPipelineEntry =
+    contact.pipelineEnteredAt === null && PIPELINE_STAGES.has(newStage);
+
+  await db.contact.update({
+    where: { id: contactId },
+    data: {
+      lifecycleStage: newStage,
+      lifecycleStageEnteredAt: new Date(),
+      ...(isFirstPipelineEntry ? { pipelineEnteredAt: new Date() } : {}),
+    },
+  });
+
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true };
 }

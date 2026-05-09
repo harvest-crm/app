@@ -20,7 +20,13 @@ export type SerializedActivity = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const VALID_TYPES = ["call", "email", "meeting", "note", "sms"] as const;
+const VALID_TYPES = [
+  "call", "email", "email_opened", "meeting", "note",
+  "sms", "showing", "stage_change", "task_completed", "voice_note",
+] as const;
+
+// Types that represent real outbound/inbound contact — update lastContactAt
+const CONTACT_TYPES = new Set(["call", "email", "sms", "voice_note", "showing"]);
 
 function serialize(a: {
   id: string;
@@ -76,18 +82,30 @@ export async function createActivity(
 
   const occurredAt = occurredAtRaw ? new Date(occurredAtRaw) : new Date();
 
-  const activity = await db.activity.create({
-    data: {
-      organizationId,
-      type,
-      body,
-      contactId,
-      dealId,
-      workspaceId,
-      occurredAt,
-      createdByClerkUserId: userId,
-    },
-  });
+  const shouldUpdateLastContact = contactId && CONTACT_TYPES.has(type);
+
+  const [activity] = await db.$transaction([
+    db.activity.create({
+      data: {
+        organizationId,
+        type,
+        body,
+        contactId,
+        dealId,
+        workspaceId,
+        occurredAt,
+        createdByClerkUserId: userId,
+      },
+    }),
+    ...(shouldUpdateLastContact
+      ? [
+          db.contact.update({
+            where: { id: contactId },
+            data: { lastContactAt: occurredAt },
+          }),
+        ]
+      : []),
+  ]);
 
   if (contactId) revalidatePath(`/contacts/${contactId}`);
 

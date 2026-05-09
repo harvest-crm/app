@@ -28,6 +28,8 @@ model Organization {
   tags                   Tag[]
   customFieldDefinitions CustomFieldDefinition[]
   documents              Document[]
+  buyerProfiles          BuyerProfile[]
+  aiInsights             AiInsight[]
 }
 
 model OrganizationMember {
@@ -96,21 +98,28 @@ model Workspace {
 }
 
 model Contact {
-  id              String       @id @default(cuid())
-  organizationId  String
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  firstName       String
-  lastName        String?
-  email           String?
-  phone           String?
-  birthday        DateTime?
-  homeAnniversary DateTime?
-  source          String?
-  sourceDetail    String?
-  temperature     String       @default("warm")
-  notes           String?      @db.Text
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id                      String         @id @default(cuid())
+  organizationId          String
+  organization            Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  firstName               String
+  lastName                String?
+  email                   String?
+  phone                   String?
+  city                    String?
+  state                   String?
+  birthday                DateTime?
+  homeAnniversary         DateTime?
+  source                  String?
+  sourceDetail            String?
+  temperature             String         @default("warm")
+  notes                   String?        @db.Text
+  lifecycleStage          LifecycleStage @default(LEAD)
+  lifecycleStageEnteredAt DateTime       @default(now())
+  lastContactAt           DateTime?
+  lifetimeVolumeCents     BigInt?
+  pipelineEnteredAt       DateTime?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
 
   contactWorkspaces ContactWorkspace[]
   contactTags       ContactTag[]
@@ -118,8 +127,12 @@ model Contact {
   activities        Activity[]
   tasks             Task[]
   documents         Document[]
+  buyerProfile      BuyerProfile?
+  aiInsights        AiInsight[]
 
   @@index([organizationId])
+  @@index([organizationId, lifecycleStage])
+  @@index([organizationId, lastContactAt])
 }
 
 model ContactWorkspace {
@@ -449,4 +462,100 @@ model TaskTemplateItem {
   template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([templateId])
+}
+
+// ── Lifecycle & AI enums ──────────────────────────────────────────────────────
+
+enum LifecycleStage {
+  LEAD
+  WORKING
+  ACTIVE_BUYER
+  ACTIVE_SELLER
+  PAST_CLIENT
+  SPHERE
+  INACTIVE
+  TRASH
+}
+
+enum InsightType {
+  RE_ENGAGEMENT
+  ANNIVERSARY
+  REPLY_RECEIVED
+  NEW_LISTING_MATCH
+  PRICE_DROP_ALERT
+  STALE_DEAL
+  CLOSING_TODAY
+  PREAPPROVAL_EXPIRING
+}
+
+enum InsightPriority {
+  HIGH
+  NORMAL
+  LOW
+}
+
+enum InsightStatus {
+  PENDING
+  SENT
+  SKIPPED
+  EXPIRED
+  EDITED
+}
+
+// ── BuyerProfile ──────────────────────────────────────────────────────────────
+
+model BuyerProfile {
+  id                     String       @id @default(cuid())
+  contactId              String       @unique
+  contact                Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  organizationId         String
+  organization           Organization @relation(fields: [organizationId], references: [id])
+
+  priceMinCents          BigInt?
+  priceMaxCents          BigInt?
+  bedroomsMin            Int?
+  bathroomsMin           Decimal?     @db.Decimal(3, 1)
+  neighborhoods          String[]
+  notes                  String?      @db.Text
+
+  preApproved            Boolean      @default(false)
+  preApprovalLender      String?
+  preApprovalAmountCents BigInt?
+  preApprovalCreditScore Int?
+  preApprovalNotes       String?      @db.Text
+  preApprovalExpiresAt   DateTime?
+
+  timelineLabel          String?
+
+  currentHomeClosingDate DateTime?    @db.Date
+  currentHomeNote        String?
+
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+// ── AiInsight ─────────────────────────────────────────────────────────────────
+
+model AiInsight {
+  id               String          @id @default(cuid())
+  contactId        String
+  contact          Contact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  organizationId   String
+  organization     Organization    @relation(fields: [organizationId], references: [id])
+
+  type             InsightType
+  priority         InsightPriority @default(NORMAL)
+  reason           String          @db.Text
+  suggestedMessage String          @db.Text
+
+  status           InsightStatus   @default(PENDING)
+  actedAt          DateTime?
+
+  generatedAt      DateTime        @default(now())
+  expiresAt        DateTime?
+
+  @@index([organizationId, status, priority])
+  @@index([contactId, status])
 }

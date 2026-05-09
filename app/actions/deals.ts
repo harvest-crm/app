@@ -69,6 +69,25 @@ const contactInclude = {
   contact: { select: { id: true, firstName: true, lastName: true } },
 } as const;
 
+async function recomputeContactLifetimeVolume(contactId: string, organizationId: string) {
+  const wonDeals = await db.deal.findMany({
+    where: {
+      contactId,
+      organizationId,
+      status: "won",
+    },
+    select: { value: true },
+  });
+  const totalCents = wonDeals.reduce(
+    (sum, d) => sum + BigInt(Math.round(Number(d.value ?? 0) * 100)),
+    BigInt(0),
+  );
+  await db.contact.update({
+    where: { id: contactId },
+    data: { lifetimeVolumeCents: totalCents },
+  });
+}
+
 // ── Actions ──────────────────────────────────────────────────────────────────
 
 export async function createDeal(
@@ -154,6 +173,11 @@ export async function updateDeal(
       dealId: id, newStageId: stageId, oldStageId: existing.stageId,
       organizationId, userId, contactId: parsed.data.contactId || existing.contactId,
     });
+    // Recompute lifetime volume if deal moved to a won terminal stage
+    const effectiveContactId = (parsed.data.contactId ?? null) || existing.contactId;
+    if (stage.isTerminal && effectiveContactId) {
+      void recomputeContactLifetimeVolume(effectiveContactId, organizationId);
+    }
   }
 
   revalidatePath(`/workspaces/${existing.workspace.slug}/deals`);
@@ -197,6 +221,11 @@ export async function moveDealToStage(
     dealId, newStageId: stageId, oldStageId,
     organizationId, userId, contactId: deal.contactId,
   });
+
+  // Recompute lifetime volume if moved to a terminal stage
+  if (stage.isTerminal && deal.contactId) {
+    void recomputeContactLifetimeVolume(deal.contactId, organizationId);
+  }
 
   revalidatePath(`/workspaces/${deal.workspace.slug}/deals`);
   return { success: true };
