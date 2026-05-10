@@ -136,25 +136,27 @@ export function InsightCard({ insight: initial, contactPhone, contactEmail }: Pr
     }
   }
 
-  // ── Message sub-card ──────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
 
-  function MessageSubCard() {
-    if (isRegenerating) {
-      return (
+  return (
+    <div className="bg-brand-gold-tint-light border border-brand-gold-border rounded-card p-4">
+      <div className="flex items-center gap-1.5 mb-2">
+        <IconSparkles size={16} className="text-brand-gold shrink-0" />
+        <span className="text-[12px] font-medium text-brand-gold">AI insight</span>
+      </div>
+
+      <p className="text-[14px] text-ink-900 leading-relaxed mb-3">{initial.reason}</p>
+
+      {/* Message sub-card — inlined to keep the textarea at a stable DOM position */}
+      {isRegenerating ? (
         <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-3">
           <p className="text-[13px] text-ink-400 italic leading-relaxed">Regenerating draft...</p>
         </div>
-      );
-    }
-    if (regenError) {
-      return (
+      ) : regenError ? (
         <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-3">
           <p className="text-[13px] text-danger leading-relaxed">{regenError}</p>
         </div>
-      );
-    }
-    if (isEditing) {
-      return (
+      ) : isEditing ? (
         <div className="mb-3 space-y-2">
           <textarea
             className="w-full min-h-[80px] rounded-card-sm border border-brand-gold-border bg-white px-3 py-2 text-[13px] text-ink-900 leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-brand-gold"
@@ -181,38 +183,21 @@ export function InsightCard({ insight: initial, contactPhone, contactEmail }: Pr
             </Button>
           </div>
         </div>
-      );
-    }
-    if (!messageIsReady(message)) return null;
-    return (
-      <>
-        <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-1">
-          <p className="text-[13px] text-ink-500 leading-relaxed">{message}</p>
-        </div>
-        {showSaved && (
-          <p
-            className="text-[11px] text-success mb-2"
-            style={{ opacity: savedFading ? 0 : 1, transition: "opacity 500ms" }}
-          >
-            Saved
-          </p>
-        )}
-      </>
-    );
-  }
-
-  // ── Render ────────────────────────────────────────────────────────────────
-
-  return (
-    <div className="bg-brand-gold-tint-light border border-brand-gold-border rounded-card p-4">
-      <div className="flex items-center gap-1.5 mb-2">
-        <IconSparkles size={16} className="text-brand-gold shrink-0" />
-        <span className="text-[12px] font-medium text-brand-gold">AI insight</span>
-      </div>
-
-      <p className="text-[14px] text-ink-900 leading-relaxed mb-3">{initial.reason}</p>
-
-      <MessageSubCard />
+      ) : messageIsReady(message) ? (
+        <>
+          <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-1">
+            <p className="text-[13px] text-ink-500 leading-relaxed">{message}</p>
+          </div>
+          {showSaved && (
+            <p
+              className="text-[11px] text-success mb-2"
+              style={{ opacity: savedFading ? 0 : 1, transition: "opacity 500ms" }}
+            >
+              Saved
+            </p>
+          )}
+        </>
+      ) : null}
 
       <div className="flex items-center gap-2 flex-wrap">
         <Button
