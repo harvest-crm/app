@@ -46,9 +46,18 @@ const RULES: Array<{
   { type: InsightType.ANNIVERSARY,          name: "anniversary",          fn: findAnniversaryCandidates },
 ];
 
-// ── Context builder ───────────────────────────────────────────────────────────
+// ── Shared helpers (also used by the regenerate API route) ───────────────────
 
-async function buildMessageContext(
+export async function getAgentFirstName(organizationId: string): Promise<string | null> {
+  const owner = await db.organizationMember.findFirst({
+    where: { organizationId, isActive: true },
+    orderBy: { joinedAt: "asc" },
+    select: { firstName: true },
+  });
+  return owner?.firstName ?? null;
+}
+
+export async function buildMessageContext(
   insight: { id: string; type: InsightType; contactId: string },
   agentFirstName: string | null,
 ): Promise<MessageContext> {
@@ -170,6 +179,8 @@ export async function generateInsightsForOrg(
     where: {
       organizationId,
       status: InsightStatus.PENDING,
+      manuallyEdited: false,
+      actedAt: null,
       OR: [
         { suggestedMessage: PENDING_STUB },
         { suggestedMessage: { startsWith: FAILED_STUB }, generationAttempts: { lt: 3 } },
@@ -178,13 +189,7 @@ export async function generateInsightsForOrg(
     select: { id: true, type: true, contactId: true, generationAttempts: true },
   });
 
-  // Agent first name: oldest active member = org creator
-  const owner = await db.organizationMember.findFirst({
-    where: { organizationId, isActive: true },
-    orderBy: { joinedAt: "asc" },
-    select: { firstName: true },
-  });
-  const agentFirstName = owner?.firstName ?? null;
+  const agentFirstName = await getAgentFirstName(organizationId);
 
   const generation: GenerationResult[] = [];
 

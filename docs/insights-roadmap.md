@@ -8,7 +8,7 @@
 | 1/3 | PREAPPROVAL_EXPIRING — buyer pre-approval expires within 30 days | Done |
 | 1/3 | ANNIVERSARY — home anniversary within 30 days | Done |
 | 2/3 | LLM message generation (replaces "Pending generation." stub) | Done |
-| 3/3 | Act-on-insight UI wiring (Send / Edit / Skip actions) | Planned |
+| 3/3 | Act-on-insight UI wiring (Send / Edit / Dismiss / Regenerate) | Done |
 
 ---
 
@@ -28,6 +28,12 @@
 - Dedupe: same pattern — skip if a `PENDING` insight of type `NEVER_CONTACTED` already exists
 
 **Out of scope:** Sessions 1, 2, and 3.
+
+---
+
+## Future UX
+
+- Dismiss should support a 5-second undo toast — misclicks shouldn't be destructive. Out of scope for session 3.
 
 ---
 

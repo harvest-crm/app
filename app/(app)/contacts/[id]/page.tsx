@@ -10,7 +10,6 @@ import {
   IconMail,
   IconCalendar,
   IconMapPin,
-  IconSparkles,
   IconHistory,
   IconHome,
   IconMicrophone,
@@ -26,7 +25,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { buildLookingForDisplay, formatCurrency } from "@/lib/format"
 import { LifecycleStage } from "@/app/generated/prisma/client"
-import { messageIsReady } from "@/lib/insights/constants"
+import { InsightCard } from "@/components/insights/insight-card"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -176,7 +175,7 @@ export default async function ContactDetailPage({
       take: 5,
     }),
     db.aiInsight.findFirst({
-      where: { contactId: id, organizationId: org.id, status: "PENDING" },
+      where: { contactId: id, organizationId: org.id, status: "PENDING", actedAt: null },
       orderBy: [{ priority: "asc" }, { generatedAt: "desc" }],
     }),
   ])
@@ -259,32 +258,13 @@ export default async function ContactDetailPage({
         </Button>
       </div>
 
-      {/* 3.3 AI insight — only rendered when a PENDING insight exists */}
+      {/* 3.3 AI insight — only rendered when a PENDING, unacted insight exists */}
       {aiInsight && (
-        <div className="bg-brand-gold-tint-light border border-brand-gold-border rounded-card p-4">
-          <div className="flex items-center gap-1.5 mb-2">
-            <IconSparkles size={16} className="text-brand-gold shrink-0" />
-            <span className="text-[12px] font-medium text-brand-gold">AI insight</span>
-          </div>
-          <p className="text-[14px] text-ink-900 leading-relaxed mb-3">
-            {aiInsight.reason}
-          </p>
-          {messageIsReady(aiInsight.suggestedMessage) && (
-            <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-3">
-              <p className="text-[13px] text-ink-500 leading-relaxed">
-                {aiInsight.suggestedMessage}
-              </p>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <Button variant="gold" className="rounded-btn h-7 px-3 text-xs gap-1.5">
-              Send
-            </Button>
-            <Button variant="ghost" className="text-brand-gold hover:text-brand-gold hover:bg-transparent h-7 px-3 text-xs">
-              Edit
-            </Button>
-          </div>
-        </div>
+        <InsightCard
+          insight={aiInsight}
+          contactPhone={contact.phone ?? null}
+          contactEmail={contact.email ?? null}
+        />
       )}
 
       {/* 3.4 Stats grid ──────────────────────────────────────────────────── */}
