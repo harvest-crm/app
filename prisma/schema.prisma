@@ -550,11 +550,12 @@ model AiInsight {
   reason           String          @db.Text
   suggestedMessage String          @db.Text
 
-  status           InsightStatus   @default(PENDING)
-  actedAt          DateTime?
+  status             InsightStatus   @default(PENDING)
+  actedAt            DateTime?
+  generationAttempts Int             @default(0)
 
-  generatedAt      DateTime        @default(now())
-  expiresAt        DateTime?
+  generatedAt        DateTime        @default(now())
+  expiresAt          DateTime?
 
   @@index([organizationId, status, priority])
   @@index([contactId, status])

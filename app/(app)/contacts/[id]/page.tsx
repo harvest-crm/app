@@ -26,6 +26,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { buildLookingForDisplay, formatCurrency } from "@/lib/format"
 import { LifecycleStage } from "@/app/generated/prisma/client"
+import { messageIsReady } from "@/lib/insights/constants"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -268,11 +269,13 @@ export default async function ContactDetailPage({
           <p className="text-[14px] text-ink-900 leading-relaxed mb-3">
             {aiInsight.reason}
           </p>
-          <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-3">
-            <p className="text-[13px] text-ink-500 leading-relaxed">
-              {aiInsight.suggestedMessage}
-            </p>
-          </div>
+          {messageIsReady(aiInsight.suggestedMessage) && (
+            <div className="bg-white border border-brand-gold-border rounded-card-sm p-3 mb-3">
+              <p className="text-[13px] text-ink-500 leading-relaxed">
+                {aiInsight.suggestedMessage}
+              </p>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Button variant="gold" className="rounded-btn h-7 px-3 text-xs gap-1.5">
               Send

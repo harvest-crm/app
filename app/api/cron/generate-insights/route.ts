@@ -21,23 +21,25 @@ export async function GET(req: Request) {
     const breakdown: Array<{
       orgId: string;
       orgName: string;
-      rules: Awaited<ReturnType<typeof generateInsightsForOrg>>;
+      rules: Awaited<ReturnType<typeof generateInsightsForOrg>>["rules"];
+      generation: Awaited<ReturnType<typeof generateInsightsForOrg>>["generation"];
     }> = [];
 
     for (const org of orgs) {
-      const rules = await generateInsightsForOrg(org.id);
-      breakdown.push({ orgId: org.id, orgName: org.name, rules });
+      const { rules, generation } = await generateInsightsForOrg(org.id);
+      breakdown.push({ orgId: org.id, orgName: org.name, rules, generation });
     }
 
-    const allRules = breakdown.flatMap((b) => b.rules);
-    const totalCreated = allRules.reduce((s, r) => s + r.created, 0);
-    const totalSkipped = allRules.reduce((s, r) => s + r.skipped, 0);
+    const allRules      = breakdown.flatMap((b) => b.rules);
+    const allGeneration = breakdown.flatMap((b) => b.generation);
 
     return NextResponse.json({
-      orgsProcessed: orgs.length,
-      totalCreated,
-      totalSkipped,
-      durationMs: Date.now() - start,
+      orgsProcessed:        orgs.length,
+      totalCreated:         allRules.reduce((s, r) => s + r.created, 0),
+      totalSkipped:         allRules.reduce((s, r) => s + r.skipped, 0),
+      totalGenerated:       allGeneration.filter((g) => g.success).length,
+      totalGenerationFailed:allGeneration.filter((g) => !g.success).length,
+      durationMs:           Date.now() - start,
       breakdown,
     });
   } catch (err) {
