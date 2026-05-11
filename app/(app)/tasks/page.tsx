@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ViewPicker } from "@/components/saved-views/view-picker";
 import { FilterBar } from "@/components/saved-views/filter-bar";
 import { buildTaskWhere } from "@/lib/saved-views/build-where";
+import { getAccessControl, assigneeFilter } from "@/lib/access";
 import { decodeTaskFilters } from "@/lib/saved-views/url-encoder";
 import { listViews } from "@/app/actions/saved-views";
 
@@ -64,8 +65,8 @@ export default async function TasksPage({
 
   const sp = new URLSearchParams(params);
   const filters = decodeTaskFilters(sp);
-  // Default to open tasks only
   if (!filters.status) filters.status = "open";
+  const { visibleUserIds } = await getAccessControl(org.id);
 
   const [workspaces, savedViews, tasks] = await Promise.all([
     db.workspace.findMany({
@@ -75,7 +76,7 @@ export default async function TasksPage({
     }),
     listViews("task"),
     db.task.findMany({
-      where: buildTaskWhere(filters, org.id),
+      where: { ...buildTaskWhere(filters, org.id), ...assigneeFilter(visibleUserIds) },
       include: {
         contact: { select: { id: true, firstName: true, lastName: true } },
         deal:    { select: { id: true, title: true, workspace: { select: { slug: true } } } },

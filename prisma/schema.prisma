@@ -118,6 +118,7 @@ model Contact {
   lastContactAt           DateTime?
   lifetimeVolumeCents     BigInt?
   pipelineEnteredAt       DateTime?
+  ownerClerkUserId        String?
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt
 
@@ -133,6 +134,7 @@ model Contact {
   @@index([organizationId])
   @@index([organizationId, lifecycleStage])
   @@index([organizationId, lastContactAt])
+  @@index([organizationId, ownerClerkUserId])
 }
 
 model ContactWorkspace {
@@ -210,6 +212,7 @@ model Deal {
   status            String       @default("open")
   movedToStageAt    DateTime     @default(now())
   notes             String?      @db.Text
+  ownerClerkUserId  String?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
@@ -218,6 +221,7 @@ model Deal {
   documents  Document[]
 
   @@index([organizationId, workspaceId])
+  @@index([organizationId, ownerClerkUserId])
 }
 
 model Activity {
@@ -262,6 +266,7 @@ model Task {
   createdAt             DateTime     @default(now())
 
   @@index([organizationId, dueAt])
+  @@index([organizationId, assignedToClerkUserId])
 }
 
 model Tag {
@@ -555,10 +560,12 @@ model AiInsight {
   dismissedAt        DateTime?
   manuallyEdited     Boolean         @default(false)
   generationAttempts Int             @default(0)
+  ownerClerkUserId   String?
 
   generatedAt        DateTime        @default(now())
   expiresAt          DateTime?
 
   @@index([organizationId, status, priority])
   @@index([contactId, status])
+  @@index([organizationId, ownerClerkUserId, status])
 }

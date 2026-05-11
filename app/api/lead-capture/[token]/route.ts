@@ -86,10 +86,18 @@ export async function POST(
     );
   }
 
+  // Lead-capture has no authenticated user — assign to org founder
+  const orgOwner = await db.organizationMember.findFirst({
+    where: { organizationId: workspace.organizationId, isActive: true },
+    orderBy: { joinedAt: "asc" },
+    select: { clerkUserId: true },
+  });
+
   // Create contact
   const contact = await db.contact.create({
     data: {
-      organizationId: workspace.organizationId,
+      organizationId:  workspace.organizationId,
+      ownerClerkUserId: orgOwner?.clerkUserId ?? null,
       firstName:      firstName?.trim()  || "Unknown",
       lastName:       lastName?.trim()   || null,
       email:          email?.trim()      || null,

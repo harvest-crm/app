@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { getAccessControl, ownerFilter, assigneeFilter } from "@/lib/access";
 import { TodayDashboard } from "@/components/today-dashboard";
 import type { SerializedTask } from "@/app/actions/tasks";
 import type { SerializedActivity } from "@/app/actions/activities";
@@ -54,6 +55,7 @@ export default async function TodayPage() {
 
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
   const firstName = titleCase(user?.firstName || email.split("@")[0] || "there");
+  const { visibleUserIds } = await getAccessControl(org.id);
 
   const now = new Date();
   const startOfToday = new Date(
@@ -80,6 +82,7 @@ export default async function TodayPage() {
         organizationId: org.id,
         dueAt: { lt: startOfToday },
         completedAt: null,
+        ...assigneeFilter(visibleUserIds),
       },
       orderBy: { dueAt: "asc" },
       take: 50,
@@ -91,6 +94,7 @@ export default async function TodayPage() {
         organizationId: org.id,
         dueAt: { gte: startOfToday, lte: endOfToday },
         completedAt: null,
+        ...assigneeFilter(visibleUserIds),
       },
       orderBy: { dueAt: "asc" },
       take: 50,
@@ -102,14 +106,23 @@ export default async function TodayPage() {
         organizationId: org.id,
         completedAt: null,
         reminderAt: { gte: now, lte: in24h },
+        ...assigneeFilter(visibleUserIds),
       },
       orderBy: { reminderAt: "asc" },
       take: 20,
     }),
 
-    // Recent activities with contact info joined
+    // Recent activities — visibility inherited from parent contact/deal ownership
     db.activity.findMany({
-      where: { organizationId: org.id, occurredAt: { gte: sevenDaysAgo } },
+      where: {
+        organizationId: org.id,
+        occurredAt: { gte: sevenDaysAgo },
+        OR: [
+          { contact: { ...ownerFilter(visibleUserIds) } },
+          { contactId: null, deal: { ...ownerFilter(visibleUserIds) } },
+          { contactId: null, dealId: null },
+        ],
+      },
       include: {
         contact: { select: { id: true, firstName: true, lastName: true } },
       },
@@ -120,27 +133,27 @@ export default async function TodayPage() {
     // Stats: parallel sub-queries
     Promise.all([
       db.contact.count({
-        where: { organizationId: org.id, createdAt: { gte: sevenDaysAgo } },
+        where: { organizationId: org.id, createdAt: { gte: sevenDaysAgo }, ...ownerFilter(visibleUserIds) },
       }),
       db.deal.count({
-        where: { organizationId: org.id, movedToStageAt: { gte: sevenDaysAgo } },
+        where: { organizationId: org.id, movedToStageAt: { gte: sevenDaysAgo }, ...ownerFilter(visibleUserIds) },
       }),
       db.task.count({
-        where: { organizationId: org.id, completedAt: { gte: sevenDaysAgo } },
+        where: { organizationId: org.id, completedAt: { gte: sevenDaysAgo }, ...assigneeFilter(visibleUserIds) },
       }),
     ]),
 
     // Pipeline value sum of open deals
     db.deal.aggregate({
-      where: { organizationId: org.id, status: "open" },
+      where: { organizationId: org.id, status: "open", ...ownerFilter(visibleUserIds) },
       _sum: { value: true },
     }),
 
     // Open deal count
-    db.deal.count({ where: { organizationId: org.id, status: "open" } }),
+    db.deal.count({ where: { organizationId: org.id, status: "open", ...ownerFilter(visibleUserIds) } }),
 
     // Whether org has any contacts at all
-    db.contact.count({ where: { organizationId: org.id } }),
+    db.contact.count({ where: { organizationId: org.id, ...ownerFilter(visibleUserIds) } }),
 
     // First workspace for "visit workspace" CTA
     db.workspace.findFirst({

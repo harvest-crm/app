@@ -10,6 +10,7 @@ import { FilterBar } from "@/components/saved-views/filter-bar";
 import { buildDealWhere } from "@/lib/saved-views/build-where";
 import { decodeDealFilters } from "@/lib/saved-views/url-encoder";
 import { listViews } from "@/app/actions/saved-views";
+import { getAccessControl, ownerFilter } from "@/lib/access";
 
 export const metadata: Metadata = { title: "Deals" };
 
@@ -50,11 +51,12 @@ export default async function DealsListPage({
 
   const sp = new URLSearchParams(rawParams);
   const filters = decodeDealFilters(sp);
+  const { visibleUserIds } = await getAccessControl(org.id);
 
   const [savedViews, deals] = await Promise.all([
     listViews("deal"),
     db.deal.findMany({
-      where: buildDealWhere(filters, org.id, workspace.id),
+      where: { ...buildDealWhere(filters, org.id, workspace.id), ...ownerFilter(visibleUserIds) },
       include: {
         stage:   { select: { id: true, name: true, isTerminal: true, terminalOutcome: true } },
         contact: { select: { id: true, firstName: true, lastName: true } },

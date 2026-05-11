@@ -94,7 +94,7 @@ export async function createDeal(
   formData: FormData
 ): Promise<{ deal: SerializedDeal } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const raw = extractDealData(formData);
   const parsed = dealSchema.safeParse(raw);
@@ -120,6 +120,7 @@ export async function createDeal(
       notes: notes || null,
       status: stage.isTerminal ? (stage.terminalOutcome ?? "open") : "open",
       movedToStageAt: new Date(),
+      ownerClerkUserId: userId,
     },
     include: contactInclude,
   });
@@ -136,7 +137,7 @@ export async function updateDeal(
   const { organizationId, userId } = await requireOrg();
 
   const existing = await db.deal.findFirst({
-    where: { id, organizationId },
+    where: { id, organizationId, ownerClerkUserId: userId },
     include: { workspace: true },
   });
   if (!existing) return { error: "Deal not found" };
@@ -192,7 +193,7 @@ export async function moveDealToStage(
   const { organizationId, userId } = await requireOrg();
 
   const deal = await db.deal.findFirst({
-    where: { id: dealId, organizationId },
+    where: { id: dealId, organizationId, ownerClerkUserId: userId },
     include: { workspace: true },
   });
   if (!deal) return { error: "Deal not found" };
@@ -235,10 +236,10 @@ export async function deleteDeal(
   id: string
 ): Promise<{ success: true } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const deal = await db.deal.findFirst({
-    where: { id, organizationId },
+    where: { id, organizationId, ownerClerkUserId: userId },
     include: { workspace: true },
   });
   if (!deal) return { error: "Deal not found" };
@@ -254,9 +255,9 @@ export async function linkContactToDeal(
   contactId: string | null,
 ): Promise<{ success: true } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
-  const deal = await db.deal.findFirst({ where: { id: dealId, organizationId }, include: { workspace: true } });
+  const deal = await db.deal.findFirst({ where: { id: dealId, organizationId, ownerClerkUserId: userId }, include: { workspace: true } });
   if (!deal) return { error: "Deal not found" };
 
   if (contactId) {
@@ -274,9 +275,9 @@ export async function updateDealInline(
   data: { title?: string; value?: number | null; notes?: string | null },
 ): Promise<{ success: true } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
-  const deal = await db.deal.findFirst({ where: { id: dealId, organizationId }, include: { workspace: true } });
+  const deal = await db.deal.findFirst({ where: { id: dealId, organizationId, ownerClerkUserId: userId }, include: { workspace: true } });
   if (!deal) return { error: "Deal not found" };
 
   await db.deal.update({

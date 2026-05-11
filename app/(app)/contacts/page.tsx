@@ -10,6 +10,7 @@ import { ContactsTable } from "@/components/contacts/contacts-table";
 import { ViewPicker } from "@/components/saved-views/view-picker";
 import { FilterBar } from "@/components/saved-views/filter-bar";
 import { buildContactWhere } from "@/lib/saved-views/build-where";
+import { getAccessControl, ownerFilter } from "@/lib/access";
 import { decodeContactFilters } from "@/lib/saved-views/url-encoder";
 import { listViews } from "@/app/actions/saved-views";
 import type { ContactRow } from "@/components/contacts/contacts-table";
@@ -41,6 +42,7 @@ export default async function ContactsPage({
 
   const sp = new URLSearchParams(params);
   const filters = decodeContactFilters(sp);
+  const { visibleUserIds } = await getAccessControl(org.id);
 
   const [workspaces, allTags, savedViews, contacts] = await Promise.all([
     db.workspace.findMany({
@@ -55,7 +57,7 @@ export default async function ContactsPage({
     }),
     listViews("contact"),
     db.contact.findMany({
-      where: buildContactWhere(filters, org.id),
+      where: { ...buildContactWhere(filters, org.id), ...ownerFilter(visibleUserIds) },
       include: {
         contactTags: { include: { tag: true } },
         contactWorkspaces: { include: { workspace: { select: { name: true, slug: true } } } },

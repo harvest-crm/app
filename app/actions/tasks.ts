@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/auth";
+import { getAccessControl, assigneeFilter } from "@/lib/access";
 import { blockIfImpersonating } from "@/lib/admin/impersonation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -125,7 +126,7 @@ export async function createTask(
   formData: FormData
 ): Promise<{ task: SerializedTask } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
   const data = extractTaskData(formData);
 
   if (!data.title) return { error: "Title is required" };
@@ -135,15 +136,16 @@ export async function createTask(
   const task = await db.task.create({
     data: {
       organizationId,
-      title:       data.title,
-      description: data.description,
-      priority:    data.priority,
-      taskType:    data.taskType,
-      dueAt:       data.dueAt,
-      reminderAt:  data.reminderAt,
-      contactId:   data.contactId,
-      dealId:      data.dealId,
-      workspaceId: data.workspaceId,
+      title:                data.title,
+      description:          data.description,
+      priority:             data.priority,
+      taskType:             data.taskType,
+      dueAt:                data.dueAt,
+      reminderAt:           data.reminderAt,
+      contactId:            data.contactId,
+      dealId:               data.dealId,
+      workspaceId:          data.workspaceId,
+      assignedToClerkUserId: userId,
     },
   });
 
@@ -157,8 +159,8 @@ export async function updateTask(
   formData: FormData
 ): Promise<{ task: SerializedTask } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
-  const existing = await db.task.findFirst({ where: { id, organizationId } });
+  const { organizationId, userId } = await requireOrg();
+  const existing = await db.task.findFirst({ where: { id, organizationId, assignedToClerkUserId: userId } });
   if (!existing) return { error: "Task not found" };
 
   const data = extractTaskData(formData);
@@ -185,8 +187,8 @@ export async function completeTask(
   id: string
 ): Promise<{ task: SerializedTask } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
-  const existing = await db.task.findFirst({ where: { id, organizationId } });
+  const { organizationId, userId } = await requireOrg();
+  const existing = await db.task.findFirst({ where: { id, organizationId, assignedToClerkUserId: userId } });
   if (!existing) return { error: "Task not found" };
   const task = await db.task.update({ where: { id }, data: { completedAt: new Date() } });
   return { task: serialize(task) };
@@ -196,8 +198,8 @@ export async function reopenTask(
   id: string
 ): Promise<{ task: SerializedTask } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
-  const existing = await db.task.findFirst({ where: { id, organizationId } });
+  const { organizationId, userId } = await requireOrg();
+  const existing = await db.task.findFirst({ where: { id, organizationId, assignedToClerkUserId: userId } });
   if (!existing) return { error: "Task not found" };
   const task = await db.task.update({ where: { id }, data: { completedAt: null } });
   return { task: serialize(task) };
@@ -207,8 +209,8 @@ export async function deleteTask(
   id: string
 ): Promise<{ success: true } | { error: string }> {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
-  const existing = await db.task.findFirst({ where: { id, organizationId } });
+  const { organizationId, userId } = await requireOrg();
+  const existing = await db.task.findFirst({ where: { id, organizationId, assignedToClerkUserId: userId } });
   if (!existing) return { error: "Task not found" };
   await db.task.delete({ where: { id } });
   return { success: true };
@@ -218,8 +220,9 @@ export async function listTasksForContact(
   contactId: string
 ): Promise<SerializedTask[]> {
   const { organizationId } = await requireOrg();
+  const { visibleUserIds } = await getAccessControl(organizationId);
   const rows = await db.task.findMany({
-    where: { contactId, organizationId },
+    where: { contactId, organizationId, ...assigneeFilter(visibleUserIds) },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
@@ -230,8 +233,9 @@ export async function listTasksForDeal(
   dealId: string
 ): Promise<SerializedTask[]> {
   const { organizationId } = await requireOrg();
+  const { visibleUserIds } = await getAccessControl(organizationId);
   const rows = await db.task.findMany({
-    where: { dealId, organizationId },
+    where: { dealId, organizationId, ...assigneeFilter(visibleUserIds) },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
@@ -242,8 +246,9 @@ export async function listTasksForWorkspace(
   workspaceId: string
 ): Promise<SerializedTask[]> {
   const { organizationId } = await requireOrg();
+  const { visibleUserIds } = await getAccessControl(organizationId);
   const rows = await db.task.findMany({
-    where: { workspaceId, organizationId },
+    where: { workspaceId, organizationId, ...assigneeFilter(visibleUserIds) },
     orderBy: { createdAt: "desc" },
     take: 200,
   });

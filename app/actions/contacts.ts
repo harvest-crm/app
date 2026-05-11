@@ -66,7 +66,7 @@ function extractContactData(formData: FormData) {
 
 export async function createContact(formData: FormData) {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
   const raw = extractContactData(formData);
   const parsed = contactSchema.safeParse(raw);
   if (!parsed.success) {
@@ -76,6 +76,7 @@ export async function createContact(formData: FormData) {
   const contact = await db.contact.create({
     data: {
       organizationId,
+      ownerClerkUserId: userId,
       ...normalizeContact(parsed.data),
     },
   });
@@ -101,9 +102,9 @@ export async function createContact(formData: FormData) {
 
 export async function updateContact(id: string, formData: FormData) {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
-  const existing = await db.contact.findFirst({ where: { id, organizationId } });
+  const existing = await db.contact.findFirst({ where: { id, organizationId, ownerClerkUserId: userId } });
   if (!existing) return { error: "Not found" };
 
   const raw = extractContactData(formData);
@@ -124,9 +125,9 @@ export async function updateContact(id: string, formData: FormData) {
 
 export async function deleteContact(id: string) {
   await blockIfImpersonating();
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
-  const existing = await db.contact.findFirst({ where: { id, organizationId } });
+  const existing = await db.contact.findFirst({ where: { id, organizationId, ownerClerkUserId: userId } });
   if (!existing) return { error: "Not found" };
 
   await db.contact.delete({ where: { id } });
@@ -136,10 +137,10 @@ export async function deleteContact(id: string) {
 }
 
 export async function addContactToWorkspace(contactId: string, workspaceId: string, roleLabel?: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const [contact, workspace] = await Promise.all([
-    db.contact.findFirst({ where: { id: contactId, organizationId } }),
+    db.contact.findFirst({ where: { id: contactId, organizationId, ownerClerkUserId: userId } }),
     db.workspace.findFirst({ where: { id: workspaceId, organizationId } }),
   ]);
 
@@ -156,9 +157,9 @@ export async function addContactToWorkspace(contactId: string, workspaceId: stri
 }
 
 export async function removeContactFromWorkspace(contactId: string, workspaceId: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
-  const contact = await db.contact.findFirst({ where: { id: contactId, organizationId } });
+  const contact = await db.contact.findFirst({ where: { id: contactId, organizationId, ownerClerkUserId: userId } });
   if (!contact) return { error: "Not found" };
 
   await db.contactWorkspace.deleteMany({ where: { contactId, workspaceId } });
@@ -168,10 +169,10 @@ export async function removeContactFromWorkspace(contactId: string, workspaceId:
 }
 
 export async function addTagToContact(contactId: string, tagId: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const [contact, tag] = await Promise.all([
-    db.contact.findFirst({ where: { id: contactId, organizationId } }),
+    db.contact.findFirst({ where: { id: contactId, organizationId, ownerClerkUserId: userId } }),
     db.tag.findFirst({ where: { id: tagId, organizationId } }),
   ]);
 
@@ -188,9 +189,9 @@ export async function addTagToContact(contactId: string, tagId: string) {
 }
 
 export async function removeTagFromContact(contactId: string, tagId: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
-  const contact = await db.contact.findFirst({ where: { id: contactId, organizationId } });
+  const contact = await db.contact.findFirst({ where: { id: contactId, organizationId, ownerClerkUserId: userId } });
   if (!contact) return { error: "Not found" };
 
   await db.contactTag.deleteMany({ where: { contactId, tagId } });

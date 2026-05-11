@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { InsightStatus } from "@/app/generated/prisma/client";
+import { getAccessControl, ownerFilter } from "@/lib/access";
 
 const patchSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("send") }),
@@ -26,8 +27,9 @@ export async function PATCH(
   if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 403 });
 
   const { id } = await params;
+  const { visibleUserIds } = await getAccessControl(org.id);
   const insight = await db.aiInsight.findFirst({
-    where: { id, organizationId: org.id },
+    where: { id, organizationId: org.id, ...ownerFilter(visibleUserIds) },
     select: { id: true, status: true },
   });
   if (!insight) return NextResponse.json({ error: "Not found" }, { status: 404 });

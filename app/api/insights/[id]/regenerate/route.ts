@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { buildMessageContext, getAgentFirstName } from "@/lib/insights/generate";
 import { generateSuggestedMessage } from "@/lib/insights/message-generator";
+import { getAccessControl, ownerFilter } from "@/lib/access";
 
 export async function POST(
   _req: Request,
@@ -20,8 +21,9 @@ export async function POST(
   if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 403 });
 
   const { id } = await params;
+  const { visibleUserIds } = await getAccessControl(org.id);
   const insight = await db.aiInsight.findFirst({
-    where: { id, organizationId: org.id },
+    where: { id, organizationId: org.id, ...ownerFilter(visibleUserIds) },
     select: { id: true, type: true, contactId: true },
   });
   if (!insight) return NextResponse.json({ error: "Not found" }, { status: 404 });

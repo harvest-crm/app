@@ -63,7 +63,7 @@ export async function checkEmailDuplicates(
 }
 
 export async function importContacts(formData: FormData): Promise<ImportResult | { error: string }> {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const csvString  = (formData.get("csvString")  as string) ?? "";
   const mappingsRaw = (formData.get("mappings")  as string) ?? "{}";
@@ -149,6 +149,7 @@ export async function importContacts(formData: FormData): Promise<ImportResult |
       const contact = await db.contact.create({
         data: {
           organizationId,
+          ownerClerkUserId: userId,
           firstName: firstName || "Unknown",
           lastName: lastName || null,
           email: email || null,

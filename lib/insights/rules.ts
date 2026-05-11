@@ -6,6 +6,7 @@ export type InsightCandidate = {
   firstName: string;
   reason: string;
   priority: InsightPriority;
+  ownerClerkUserId: string | null;
 };
 
 // ── Rule 1: Re-engagement ─────────────────────────────────────────────────────
@@ -31,7 +32,7 @@ export async function findReEngagementCandidates(
       lifecycleStage: { in: ACTIVE_STAGES },
       lastContactAt: { gte: cutoffStale, lte: cutoffRecent },
     },
-    select: { id: true, firstName: true, lastContactAt: true },
+    select: { id: true, firstName: true, lastContactAt: true, ownerClerkUserId: true },
   });
 
   return contacts.map((c) => {
@@ -43,6 +44,7 @@ export async function findReEngagementCandidates(
       firstName: c.firstName,
       reason: `${c.firstName} hasn't been contacted in ${days} days.`,
       priority: InsightPriority.NORMAL,
+      ownerClerkUserId: c.ownerClerkUserId,
     };
   });
 }
@@ -65,7 +67,7 @@ export async function findPreapprovalExpiringCandidates(
     select: {
       contactId: true,
       preApprovalExpiresAt: true,
-      contact: { select: { firstName: true } },
+      contact: { select: { firstName: true, ownerClerkUserId: true } },
     },
   });
 
@@ -78,6 +80,7 @@ export async function findPreapprovalExpiringCandidates(
       firstName: p.contact.firstName,
       reason: `${p.contact.firstName}'s pre-approval expires in ${days} day${days === 1 ? "" : "s"}.`,
       priority: InsightPriority.HIGH,
+      ownerClerkUserId: p.contact.ownerClerkUserId,
     };
   });
 }
@@ -90,7 +93,8 @@ export async function findPreapprovalExpiringCandidates(
 type AnniversaryRow = {
   id: string;
   firstName: string;
-  days_until: number | string; // driver may return numeric or string
+  days_until: number | string;
+  ownerClerkUserId: string | null;
 };
 
 export async function findAnniversaryCandidates(
@@ -101,6 +105,7 @@ export async function findAnniversaryCandidates(
       SELECT
         id,
         "firstName",
+        "ownerClerkUserId",
         make_date(
           EXTRACT(YEAR FROM NOW())::int,
           EXTRACT(MONTH FROM "homeAnniversary")::int,
@@ -134,6 +139,7 @@ export async function findAnniversaryCandidates(
     SELECT
       id,
       "firstName",
+      "ownerClerkUserId",
       (next_date - CURRENT_DATE)::int AS days_until
     FROM next_ann
     WHERE next_date <= CURRENT_DATE + interval '30 days'
@@ -147,6 +153,7 @@ export async function findAnniversaryCandidates(
       firstName: r.firstName,
       reason: `${r.firstName}'s home anniversary is in ${days} day${days === 1 ? "" : "s"}.`,
       priority: InsightPriority.NORMAL,
+      ownerClerkUserId: r.ownerClerkUserId,
     };
   });
 }

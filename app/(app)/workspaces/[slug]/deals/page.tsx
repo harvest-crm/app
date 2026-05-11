@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Kanban, List } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { getAccessControl, ownerFilter } from "@/lib/access";
 import { KanbanBoard } from "@/components/deals/kanban-board";
 import type { SerializedDeal, SerializedStage, ContactOption } from "@/components/deals/types";
 
@@ -30,9 +31,11 @@ export default async function DealsPage({
   });
   if (!workspace) notFound();
 
+  const { visibleUserIds } = await getAccessControl(org.id);
+
   const [deals, workspaceContactIds, allContacts] = await Promise.all([
     db.deal.findMany({
-      where: { workspaceId: workspace.id, organizationId: org.id },
+      where: { workspaceId: workspace.id, organizationId: org.id, ...ownerFilter(visibleUserIds) },
       include: {
         contact: { select: { id: true, firstName: true, lastName: true } },
       },

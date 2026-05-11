@@ -163,6 +163,7 @@ export async function generateInsightsForOrg(
           reason: candidate.reason,
           suggestedMessage: PENDING_STUB,
           status: InsightStatus.PENDING,
+          ownerClerkUserId: candidate.ownerClerkUserId,
           generatedAt: now,
           expiresAt: new Date(now.getTime() + 30 * 86_400_000),
         },

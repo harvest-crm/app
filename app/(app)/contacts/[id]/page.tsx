@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button"
 import { buildLookingForDisplay, formatCurrency } from "@/lib/format"
 import { LifecycleStage } from "@/app/generated/prisma/client"
 import { InsightCard } from "@/components/insights/insight-card"
+import { getAccessControl, ownerFilter } from "@/lib/access"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -161,21 +162,25 @@ export default async function ContactDetailPage({
   })
   if (!org) return null
 
+  const { visibleUserIds } = await getAccessControl(org.id)
+
   const [contact, rawActivities, latestInsight] = await Promise.all([
     db.contact.findFirst({
-      where: { id, organizationId: org.id },
+      where: { id, organizationId: org.id, ...ownerFilter(visibleUserIds) },
       include: {
         contactTags: { include: { tag: true } },
         buyerProfile: true,
       },
     }),
     db.activity.findMany({
+      // Activities inherit visibility from their parent contact.
+      // We fetched the contact with the owner filter above; if it's null we'll 404 below.
       where: { contactId: id, organizationId: org.id },
       orderBy: { occurredAt: "desc" },
       take: 5,
     }),
     db.aiInsight.findFirst({
-      where: { contactId: id, organizationId: org.id, status: "PENDING", actedAt: null },
+      where: { contactId: id, organizationId: org.id, status: "PENDING", actedAt: null, ...ownerFilter(visibleUserIds) },
       orderBy: [{ priority: "asc" }, { generatedAt: "desc" }],
     }),
   ])
