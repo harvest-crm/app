@@ -34,14 +34,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } else if (clerkOrgId) {
     const org = await db.organization.findUnique({
       where: { clerkOrgId },
-      select: { id: true, isSuspended: true },
+      select: { id: true, isSuspended: true, accessStatus: true },
     });
 
     if (org) {
-      // Suspension check — platform admins bypass this
-      if (org.isSuspended && userId && !(await isPlatformAdmin(userId))) {
-        redirect("/suspended");
-      }
+      // Platform admins bypass all access gates
+      const isAdmin = userId ? await isPlatformAdmin(userId) : false;
+
+      if (org.isSuspended && !isAdmin) redirect("/suspended");
+      if (org.accessStatus === "PENDING"  && !isAdmin) redirect("/pending");
+      if (org.accessStatus === "REJECTED" && !isAdmin) redirect("/rejected");
 
       workspaces = await db.workspace.findMany({
         where: { organizationId: org.id },

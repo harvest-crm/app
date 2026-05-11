@@ -16,10 +16,11 @@ const NAV = [
 
 type Props = {
   adminEmail: string;
+  pendingCount: number;
   children: React.ReactNode;
 };
 
-export function AdminShell({ adminEmail, children }: Props) {
+export function AdminShell({ adminEmail, pendingCount, children }: Props) {
   const pathname = usePathname();
 
   function isActive(href: string) {
@@ -48,6 +49,7 @@ export function AdminShell({ adminEmail, children }: Props) {
           <ul className="space-y-0.5 px-2">
             {NAV.map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
+              const showBadge = href === "/admin/organizations" && pendingCount > 0;
               return (
                 <li key={href}>
                   <Link
@@ -60,7 +62,15 @@ export function AdminShell({ adminEmail, children }: Props) {
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    {label}
+                    <span className="flex-1">{label}</span>
+                    {showBadge && (
+                      <span
+                        className="rounded-full px-1.5 py-0.5 text-xs font-medium leading-none"
+                        style={{ background: "#EF4444", color: "#fff", fontSize: "10px" }}
+                      >
+                        {pendingCount}
+                      </span>
+                    )}
                   </Link>
                 </li>
               );

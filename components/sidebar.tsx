@@ -202,9 +202,18 @@ export function Sidebar({ workspaces, isOpen = false, onClose }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="flex items-center gap-2 border-t px-3 py-3" style={{ borderColor: C.border }}>
-        <UserButton appearance={{ elements: { userButtonAvatarBox: "h-7 w-7" } }} />
-        <span className="text-xs" style={{ color: C.navySecondary }}>Account</span>
+      <div className="flex flex-col gap-2 border-t px-3 py-3" style={{ borderColor: C.border }}>
+        <div className="flex items-center gap-2">
+          <UserButton appearance={{ elements: { userButtonAvatarBox: "h-7 w-7" } }} />
+          <span className="text-xs" style={{ color: C.navySecondary }}>Account</span>
+        </div>
+        <a
+          href="mailto:thomas@dstormpg.com?subject=Covenant%20CRM%20feedback"
+          className="text-[11px] transition-colors hover:text-slate-300"
+          style={{ color: C.navySecondary }}
+        >
+          Report feedback
+        </a>
       </div>
     </aside>
   );

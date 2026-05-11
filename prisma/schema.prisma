@@ -7,16 +7,31 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AccessStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrgTier {
+  INTERNAL
+  LIFETIME_FREE
+  BROKERAGE
+  STANDARD
+}
+
 model Organization {
-  id                 String    @id @default(cuid())
-  clerkOrgId         String    @unique
+  id                 String       @id @default(cuid())
+  clerkOrgId         String       @unique
   name               String
-  plan               String    @default("free")
-  isSuspended        Boolean   @default(false)
+  plan               String       @default("free")
+  accessStatus       AccessStatus @default(PENDING)
+  tier               OrgTier      @default(STANDARD)
+  isSuspended        Boolean      @default(false)
   suspendedAt        DateTime?
   suspendedBy        String?
   suspensionReason   String?
-  createdAt          DateTime  @default(now())
+  createdAt          DateTime     @default(now())
 
   members                OrganizationMember[]
   invites                OrganizationInvite[]
